@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8" />
-  <title>Sproeier Calculator Demo</title>
+  <title>Sproeier Calculator</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -55,8 +55,13 @@
       font-weight: bold;
       transition: background 0.2s ease;
     }
-    button:hover {
-      background: #28b862;
+    button:hover { background: #28b862; }
+    .btn-secondary {
+      background: #95a5a6;
+      color: #fff;
+    }
+    .btn-secondary:hover {
+      background: #7f8c8d;
     }
     #resultaat {
       margin-top: 20px;
@@ -69,38 +74,80 @@
       font-size: 13px;
       color: #2d7043;
     }
+    .knoppen {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
   <div class="logo-wrapper">
     <img src="logo.png" alt="Racing Team Cura logo" />
   </div>
-  <h1>Sproeier Calculator (demo)</h1>
+
+  <h1>Sproeier Calculator</h1>
   <p>
-    Vul de weergegevens in. Deze demo berekent de sproeier vanuit de
-    <strong>luchtdichtheid</strong> (ρ) met een eenvoudig model gebaseerd op de
-    Prisma-calculator (baseline 133, 1.47 jet per 1% ρ-verschil).
+    Vul de weergegevens in of gebruik de GPS-knop om ze automatisch op te halen.
+    De berekening gebruikt het Prisma-model (baseline 133, 1.47 jet per 1% ρ-verschil).
   </p>
 
   <label for="temp">Temperatuur (°C)</label>
-  <input id="temp" type="number" value="10" />
+  <input id="temp" type="number" placeholder="°C" />
 
   <label for="druk">Luchtdruk (hPa)</label>
-  <input id="druk" type="number" value="1013" />
+  <input id="druk" type="number" placeholder="hPa" />
 
   <label for="vocht">Vochtigheid (%)</label>
-  <input id="vocht" type="number" value="60" />
+  <input id="vocht" type="number" placeholder="%" />
 
   <label for="hoogte">Hoogte (m boven zeeniveau)</label>
-  <input id="hoogte" type="number" value="10" />
+  <input id="hoogte" type="number" placeholder="m" value="0" />
 
-  <button id="bereken" type="button">Bereken sproeier</button>
+  <div class="knoppen">
+    <button id="bereken" type="button">Bereken sproeier</button>
+    <button id="gps" type="button">🌤 Haal weer op via GPS</button>
+    <button id="reset" type="button" class="btn-secondary">Reset alle velden</button>
+  </div>
 
   <div id="resultaat"></div>
   <div id="density" class="extra-info"></div>
   <div id="extra" class="extra-info"></div>
 
   <script>
+    const R_DROOG = 287.058, R_WATER = 461.495, RHO_REF = 1.225;
+
+    function verzadigingsdruk_hPa(tC) {
+      return 6.112 * Math.exp((17.62 * tC) / (243.12 + tC));
+    }
+
+    function luchtdrukOpHoogte_hPa(p0, hoogteMeter, tempC) {
+      const T = tempC + 273.15;
+      const g = 9.80665, M = 0.0289644, R = 8.3144598;
+      return p0 * Math.exp((-g * M * hoogteMeter) / (R * T));
+    }
+
+    function berekenDichtheid(tempC, druk_hPa, vochtPct, hoogteMeter) {
+      const p_hPa = luchtdrukOpHoogte_hPa(druk_hPa, hoogteMeter, tempC);
+      const T = tempC + 273.15;
+      const e_hPa = verzadigingsdruk_hPa(tempC) * (vochtPct / 100);
+      const e_Pa = e_hPa * 100;
+      const P_Pa = p_hPa * 100;
+      const pDroog = P_Pa - e_Pa;
+      return (pDroog / (R_DROOG * T)) + (e_Pa / (R_WATER * T));
+    }
+
+    function deltaRhoPercent(rho) {
+      return ((rho - RHO_REF) / RHO_REF) * 100;
+    }
+
+    function prismaJet(rho) {
+      const delta = deltaRhoPercent(rho);
+      const jet = 133 + delta * 1.47;
+      return Math.round(Math.max(115, Math.min(155, jet)));
+    }
+
     function berekenSproeier() {
       const temp = parseFloat(document.getElementById('temp').value);
       const druk = parseFloat(document.getElementById('druk').value);
@@ -108,87 +155,69 @@
       const hoogte = parseFloat(document.getElementById('hoogte').value);
 
       if (isNaN(temp) || isNaN(druk) || isNaN(vocht) || isNaN(hoogte)) {
-        document.getElementById('resultaat').textContent =
-          'Vul alle velden goed in a.u.b.';
+        document.getElementById('resultaat').textContent = 'Vul alle velden goed in a.u.b.';
         document.getElementById('density').textContent = '';
         document.getElementById('extra').textContent = '';
         return;
-      }
-
-      // Fysische constanten
-      const R_DROOG = 287.058; // droge lucht (J/(kg·K))
-      const R_WATER = 461.495; // waterdamp (J/(kg·K))
-      const RHO_REF = 1.225;   // referentie luchtdichtheid (kg/m³)
-
-      // Hulpfuncties
-      function verzadigingsdruk_hPa(tC) {
-        return 6.112 * Math.exp((17.62 * tC) / (243.12 + tC));
-      }
-
-      function luchtdrukOpHoogte_hPa(p0, hoogteMeter, tempC) {
-        const T = tempC + 273.15;
-        const g = 9.80665;
-        const M = 0.0289644; // kg/mol
-        const R = 8.3144598;
-        return p0 * Math.exp((-g * M * hoogteMeter) / (R * T));
-      }
-
-      function berekenDichtheid(tempC, druk_hPa, vochtPct, hoogteMeter) {
-        const p_hPa = luchtdrukOpHoogte_hPa(druk_hPa, hoogteMeter, tempC);
-        const T = tempC + 273.15;
-        const e_hPa = verzadigingsdruk_hPa(tempC) * (vochtPct / 100);
-        const e_Pa = e_hPa * 100;
-        const P_Pa = p_hPa * 100;
-        const pDroog = P_Pa - e_Pa;
-        return (pDroog / (R_DROOG * T)) + (e_Pa / (R_WATER * T));
-      }
-
-      function deltaRhoPercent(rho) {
-        return ((rho - RHO_REF) / RHO_REF) * 100;
-      }
-
-      function prismaJet(rho) {
-        const delta = deltaRhoPercent(rho);
-        const jet = 133 + delta * 1.47;
-        return Math.round(Math.max(115, Math.min(155, jet)));
       }
 
       const rho = berekenDichtheid(temp, druk, vocht, hoogte);
       const jet = prismaJet(rho);
       const delta = deltaRhoPercent(rho);
 
-      document.getElementById('resultaat').textContent =
-        'Advies sproeier (demo): ' + jet;
-
+      document.getElementById('resultaat').textContent = 'Aanbevolen sproeier: ' + jet;
       document.getElementById('density').textContent =
-        'Berekende luchtdichtheid: ' + rho.toFixed(3) +
+        'Luchtdichtheid: ' + rho.toFixed(3) +
         ' kg/m³ (' + (delta >= 0 ? '+' : '') + delta.toFixed(1) + '% t.o.v. 1.225)';
-
-      document.getElementById('extra').textContent =
-        '(Let op: dit is een DEMO-berekening – verifieer altijd met bougiekleur en prestaties.)';
+      document.getElementById('extra').textContent = 'Controleer altijd bougiekleur en prestaties.';
     }
 
-    function initialiseer() {
-      const berekenKnop = document.getElementById('bereken');
-      if (berekenKnop) {
-        berekenKnop.addEventListener('click', berekenSproeier);
+    async function haalWeerViaGPS() {
+      const status = document.getElementById('resultaat');
+      status.textContent = 'GPS zoeken...';
+
+      if (!navigator.geolocation) {
+        status.textContent = 'GPS niet beschikbaar op dit apparaat.';
+        return;
       }
 
-      ['temp', 'druk', 'vocht', 'hoogte'].forEach(function(id) {
-        const el = document.getElementById(id);
-        if (el) {
-          el.addEventListener('input', berekenSproeier);
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        status.textContent = 'Weer ophalen...';
+
+        try {
+          const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,pressure_msl`;
+          const res = await fetch(url);
+          const data = await res.json();
+          const cur = data.current;
+
+          document.getElementById('temp').value = cur.temperature_2m.toFixed(1);
+          document.getElementById('druk').value = cur.pressure_msl.toFixed(1);
+          document.getElementById('vocht').value = cur.relative_humidity_2m.toFixed(0);
+          document.getElementById('hoogte').value = 0;
+
+          status.textContent = 'Weerdata geladen. Velden ingevuld.';
+          berekenSproeier();
+        } catch {
+          status.textContent = 'Kon weer niet ophalen (geen internet of API-fout).';
         }
+      }, () => {
+        status.textContent = 'GPS geweigerd of mislukt.';
       });
-
-      berekenSproeier();
     }
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initialiseer);
-    } else {
-      initialiseer();
+    function resetVelden() {
+      ['temp', 'druk', 'vocht', 'hoogte'].forEach(id => {
+        document.getElementById(id).value = id === 'hoogte' ? '0' : '';
+      });
+      document.getElementById('resultaat').textContent = '';
+      document.getElementById('density').textContent = '';
+      document.getElementById('extra').textContent = '';
     }
+
+    document.getElementById('bereken').addEventListener('click', berekenSproeier);
+    document.getElementById('gps').addEventListener('click', haalWeerViaGPS);
+    document.getElementById('reset').addEventListener('click', resetVelden);
   </script>
 </body>
 </html>
