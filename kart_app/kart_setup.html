@@ -32,7 +32,7 @@
 
     h1 {
       font-size: 1.4rem;
-      margin: 0 0 4px;
+      margin: 0;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -51,13 +51,14 @@
     .subtitle {
       font-size: 0.85rem;
       color: #9ca3af;
-      margin-bottom: 14px;
+      margin-top: 4px;
     }
 
     .layout {
       display: grid;
       grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.4fr);
       gap: 18px;
+      margin-top: 16px;
     }
 
     @media (max-width: 950px) {
@@ -211,6 +212,11 @@
       text-align: right;
     }
 
+    .footer span.brand {
+      color: #9ca3af;
+      font-weight: 500;
+    }
+
     .two-cols {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -223,7 +229,39 @@
       }
     }
 
-    /* Kleine knoppen voor de OTK-baseline toggle */
+    /* Header met logo */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .rtc-logo {
+      height: 52px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    @media (max-width: 600px) {
+      .header {
+        flex-direction: row;
+        align-items: flex-start;
+      }
+
+      .rtc-logo {
+        height: 42px;
+      }
+    }
+
+    /* OTK baseline toggle */
     .baseline-toggle-row {
       display: flex;
       gap: 6px;
@@ -242,6 +280,7 @@
       text-transform: none;
       letter-spacing: 0;
       box-shadow: none;
+      cursor: pointer;
     }
 
     .baseline-btn:hover {
@@ -271,15 +310,27 @@
 </head>
 <body>
   <div class="app">
-    <h1>
-      Kart Setup Helper
-      <span class="badge">OTK / Tony Kart 401RR</span>
-      <span class="badge">v0.3 + OTK guide</span>
-    </h1>
-    <div class="subtitle">
-      Kies wat je kart doet in de bocht en de baanconditie. De tool geeft
-      een paar <strong>eerst-proberen</strong> stappen en daarna grotere veranderingen.
-      Zie het als richtlijn – uiteindelijk beslist de stopwatch. ⏱️
+    <!-- HEADER + LOGO -->
+    <div class="header">
+      <div class="header-left">
+        <h1>
+          Kart Setup Helper
+          <span class="badge">OTK / Tony Kart 401RR</span>
+          <span class="badge">v0.3 + OTK guide</span>
+        </h1>
+        <div class="subtitle">
+          Kies wat je kart doet in de bocht en de baanconditie. De tool geeft
+          een paar <strong>eerst-proberen</strong> stappen en daarna grotere veranderingen.
+          Zie het als richtlijn – uiteindelijk beslist de stopwatch. ⏱️
+        </div>
+      </div>
+
+      <!-- LOGO RECHTSBOVEN -->
+      <img
+        src="racing-team-cura-logo.png"
+        alt="Racing Team Cura"
+        class="rtc-logo"
+      />
     </div>
 
     <div class="layout">
@@ -358,7 +409,7 @@
               </div>
             </div>
 
-            <div class="two-cols" style="margin-top:6px;">
+            <div class="two-cols" style="margin-top:6px%;">
               <div>
                 <label for="track_front">Voorspoor (mm totaal)</label>
                 <input id="track_front" placeholder="Bijv. 1200" />
@@ -412,7 +463,7 @@
               OTK standaard setup
               <span>401RR</span>
             </h2>
-            <small>Korte referentie uit de officiële OTK chassis setup guide voor een senior OTK/Tony Kart chassis (Mojo slicks).</small>
+            <small>Korte referentie voor een senior OTK/Tony Kart chassis (slicks / regen). Gebruik dit als startpunt.</small>
 
             <div class="baseline-toggle-row">
               <button type="button" class="baseline-btn active" data-mode="dry">Droog (slicks)</button>
@@ -424,7 +475,7 @@
         </div>
 
         <div class="footer">
-          v0.3 – uitgebreid met OTK standaardsetups (dry/wet) + extra uitleg over as-types & seat stays.
+          <span class="brand">Racing Team Cura – Kart Setup Helper</span> • v0.3 + OTK guide
         </div>
       </div>
     </div>
@@ -589,40 +640,40 @@
       }
     };
 
-    // OTK standaard setup (uit de PDF) – droog & regen
+    // OTK standaard setup – droog & regen
     const otkBaseline = {
       dry: {
         title: "Standaard droog (slicks)",
         lines: [
-          "<strong>Front breedte</strong>: standaard met één grote vulring buiten per kant, standaard hubs (± 15 mm).",
+          "<strong>Front breedte</strong>: standaard met één grote vulring buiten per kant, standaard hubs.",
           "<strong>Front rijhoogte</strong>: middenpositie (1 ring boven, 1 onder de kingpin).",
           "<strong>Front torsiestang</strong>: platte stang horizontaal gemonteerd (standaard, vrij stijf).",
           "<strong>Toe-out</strong>: ongeveer 1 mm toe-out totaal.",
           "<strong>Camber</strong>: neutraal – beide excenter-pijlen (boven & onder) naar voren.",
           "<strong>Caster</strong>: neutraal – beide pijlen naar voren.",
           "<strong>Achterbreedte</strong>: ongeveer 1390 mm (senior, slicks).",
-          "<strong>Achter hubs</strong>: standaard OTK/MXP (± 92 mm mag).",
+          "<strong>Achter hubs</strong>: standaard OTK/MXP achterhubs.",
           "<strong>Achter rijhoogte</strong>: middenpositie.",
           "<strong>Achter torsiestang</strong>: geen achterbar gemonteerd.",
           "<strong>Seat stays</strong>: één extra steun per kant.",
-          "<strong>Wielen</strong>: MXP magnesiumm velgen 130/210 (standaard)."
+          "<strong>Wielen</strong>: MXP magnesium velgen 130/210 (standaard)."
         ]
       },
       wet: {
         title: "Standaard regen (full wet)",
         lines: [
-          "<strong>Front breedte</strong>: zo breed mogelijk – lange front hubs, veel spacers (maximale front grip).",
-          "<strong>Front rijhoogte</strong>: middenpositie (vaak voldoende, eventueel hoger bij veel plassen).",
-          "<strong>Front torsiestang</strong>: ronde bar bruin (hard) of platte stang verticaal voor extra front bite.",
+          "<strong>Front breedte</strong>: zo breed mogelijk – lange front hubs, veel spacers.",
+          "<strong>Front rijhoogte</strong>: middenpositie (eventueel hoger bij veel plassen).",
+          "<strong>Front torsiestang</strong>: ronde bar (hard) of platte stang verticaal voor extra front bite.",
           "<strong>Toe-out</strong>: ± 4 mm per kant (veel toe-out voor scherp insturen in nat).",
           "<strong>Camber</strong>: 1 klik positieve camber boven (meer grip midden/exit bocht).",
           "<strong>Caster</strong>: top-pijl naar voren, onderste pijl naar achter (meer caster dan neutraal).",
           "<strong>Achterbreedte</strong>: rond 1340 mm (smaller voor meer zijgrip/tractie).",
           "<strong>Achter hubs</strong>: standaard achterhubs.",
-          "<strong>Achter rijhoogte</strong>: midden (soms 1 klik hoger voor extra mechanische grip).",
+          "<strong>Achter rijhoogte</strong>: midden (of 1 klik hoger voor extra mechanische grip).",
           "<strong>Achter torsiestang</strong>: geen achterbar (kart moet nog kunnen werken/flexen).",
           "<strong>Seat stays</strong>: één extra steun per kant (eventueel meer voor extra rear grip).",
-          "<strong>Wielen</strong>: AXP aluminium 120/180 (warmt sneller op, meer grip in regen)."
+          "<strong>Wielen</strong>: aluminium regenwielen 120/180 (warmt sneller op, meer grip in regen)."
         ]
       }
     };
@@ -727,7 +778,7 @@
       });
     }
 
-    // Init event listeners
+    // Event listeners
     document.getElementById("showAdvice").addEventListener("click", () => {
       const symptom = document.getElementById("symptom").value;
       const condition = document.getElementById("condition").value;
@@ -735,7 +786,6 @@
       renderAdvice(advice);
     });
 
-    // Toggle voor OTK-baseline
     document.querySelectorAll(".baseline-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         const mode = btn.getAttribute("data-mode");
