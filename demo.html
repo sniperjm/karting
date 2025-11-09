@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sproeier Calculator Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 80px 20px 20px;
+      border: 1px solid #b8dfc8;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #f7fbf8 0%, #e4f5ea 100%);
+      color: #123524;
+      position: relative;
+    }
+    .logo-wrapper {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+    .logo-wrapper img {
+      width: 96px;
+      height: auto;
+      display: block;
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 10px;
+      color: #1f7a3d;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+      color: #1e5c36;
+    }
+    input {
+      width: 100%;
+      padding: 6px;
+      margin-top: 4px;
+      box-sizing: border-box;
+      border: 1px solid #8ec9a5;
+      border-radius: 6px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      background: #2ecc71;
+      color: #fff;
+      font-weight: bold;
+      transition: background 0.2s ease;
+    }
+    button:hover {
+      background: #28b862;
+    }
+    #resultaat {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #155f33;
+    }
+    .extra-info {
+      margin-top: 5px;
+      font-size: 13px;
+      color: #2d7043;
+    }
+  </style>
+</head>
+<body>
+  <div class="logo-wrapper">
+    <img src="logo.png" alt="Racing Team Cura logo" />
+  </div>
+  <h1>Sproeier Calculator (demo)</h1>
+  <p>
+    Vul de weergegevens in. Deze demo berekent de sproeier vanuit de
+    <strong>luchtdichtheid</strong> (ρ) met een eenvoudig model gebaseerd op de
+    Prisma-calculator (baseline 133, 1.47 jet per 1% ρ-verschil).
+  </p>
+
+  <label for="temp">Temperatuur (°C)</label>
+  <input id="temp" type="number" value="10" />
+
+  <label for="druk">Luchtdruk (hPa)</label>
+  <input id="druk" type="number" value="1013" />
+
+  <label for="vocht">Vochtigheid (%)</label>
+  <input id="vocht" type="number" value="60" />
+
+  <label for="hoogte">Hoogte (m boven zeeniveau)</label>
+  <input id="hoogte" type="number" value="10" />
+
+  <button onclick="berekenSproeier()">Bereken sproeier</button>
+
+  <div id="resultaat"></div>
+  <div id="density" class="extra-info"></div>
+  <div id="extra" class="extra-info"></div>
+
+  <script>
+    function berekenSproeier() {
+      const temp = parseFloat(document.getElementById('temp').value);
+      const druk = parseFloat(document.getElementById('druk').value);
+      const vocht = parseFloat(document.getElementById('vocht').value);
+      const hoogte = parseFloat(document.getElementById('hoogte').value);
+
+      if (isNaN(temp) || isNaN(druk) || isNaN(vocht) || isNaN(hoogte)) {
+        document.getElementById('resultaat').textContent =
+          'Vul alle velden goed in a.u.b.';
+        document.getElementById('density').textContent = '';
+        document.getElementById('extra').textContent = '';
+        return;
+      }
+
+      // Fysische constanten
+      const R_DROOG = 287.058; // droge lucht (J/(kg·K))
+      const R_WATER = 461.495; // waterdamp (J/(kg·K))
+      const RHO_REF = 1.225;   // referentie luchtdichtheid (kg/m³)
+
+      // Hulpfuncties
+      function verzadigingsdruk_hPa(tC) {
+        return 6.112 * Math.exp((17.62 * tC) / (243.12 + tC));
+      }
+
+      function luchtdrukOpHoogte_hPa(p0, hoogteMeter, tempC) {
+        const T = tempC + 273.15;
+        const g = 9.80665;
+        const M = 0.0289644; // kg/mol
+        const R = 8.3144598;
+        return p0 * Math.exp((-g * M * hoogteMeter) / (R * T));
+      }
+
+      function berekenDichtheid(tempC, druk_hPa, vochtPct, hoogteMeter) {
+        const p_hPa = luchtdrukOpHoogte_hPa(druk_hPa, hoogteMeter, tempC);
+        const T = tempC + 273.15;
+        const e_hPa = verzadigingsdruk_hPa(tempC) * (vochtPct / 100);
+        const e_Pa = e_hPa * 100;
+        const P_Pa = p_hPa * 100;
+        const pDroog = P_Pa - e_Pa;
+        return (pDroog / (R_DROOG * T)) + (e_Pa / (R_WATER * T));
+      }
+
+      function deltaRhoPercent(rho) {
+        return ((rho - RHO_REF) / RHO_REF) * 100;
+      }
+
+      function prismaJet(rho) {
+        const delta = deltaRhoPercent(rho);
+        const jet = 133 + delta * 1.47;
+        return Math.round(Math.max(115, Math.min(155, jet)));
+      }
+
+      const rho = berekenDichtheid(temp, druk, vocht, hoogte);
+      const jet = prismaJet(rho);
+      const delta = deltaRhoPercent(rho);
+
+      document.getElementById('resultaat').textContent =
+        'Advies sproeier (demo): ' + jet;
+
+      document.getElementById('density').textContent =
+        'Berekende luchtdichtheid: ' + rho.toFixed(3) +
+        ' kg/m³ (' + (delta >= 0 ? '+' : '') + delta.toFixed(1) + '% t.o.v. 1.225)';
+
+      document.getElementById('extra').textContent =
+        '(Let op: dit is een DEMO-berekening – verifieer altijd met bougiekleur en prestaties.)';
+    }
+
+    ['temp', 'druk', 'vocht', 'hoogte'].forEach(function(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', berekenSproeier);
+      }
+    });
+
+    berekenSproeier();
+  </script>
+</body>
+</html>
