@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rotax Luchtschroef & Stationair Helper</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 16px;
+      box-sizing: border-box;
+      background: #111;
+      color: #f5f5f5;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .card {
+      background: #1b1b1b;
+      border-radius: 10px;
+      padding: 14px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #444;
+      background: #111;
+      color: #f5f5f5;
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+      background: #2563eb;
+      color: white;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .result {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid #333;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    .result strong {
+      display: block;
+      margin-top: 4px;
+    }
+
+    .note {
+      font-size: 0.8rem;
+      color: #bbbbbb;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      margin-top: 4px;
+      border: 1px solid #444;
+    }
+  </style>
+</head>
+<body>
+  <h1>Rotax Luchtschroef & Stationair</h1>
+
+  <div class="card">
+    <p class="note">
+      Gebruik de <strong>Rotax Jetting / Jetting Max EVO app</strong> voor de hoofdsproeier.
+      Deze tool helpt alleen met de <strong>luchtschroef</strong> en <strong>stationair schroef</strong>
+      op basis van de temperatuur.
+    </p>
+  </div>
+
+  <div class="card">
+    <label for="temp">Temperatuur op het circuit (°C)</label>
+    <input type="number" id="temp" placeholder="Bijv. 12" />
+
+    <button onclick="bereken()">Advies berekenen</button>
+
+    <div id="result" class="result"></div>
+  </div>
+
+  <div class="card">
+    <strong>Snelle check tijdens rijden</strong>
+    <ul class="note">
+      <li>Bij gas dicht → motor komt langzaam terug naar laag stationair = meestal <em>iets te arm</em> → luchtschroef iets dicht.</li>
+      <li>Bij gas geven → motor verslikt of smoort = vaak <em>te rijk</em> → luchtschroef iets open.</li>
+      <li>Blok valt snel uit bij stationair = stationair schroef iets indraaien.</li>
+    </ul>
+  </div>
+
+  <script>
+    function bereken() {
+      const tempInput = document.getElementById("temp");
+      const resultDiv = document.getElementById("result");
+      const t = parseFloat(tempInput.value);
+
+      if (isNaN(t)) {
+        resultDiv.innerHTML = "<span class='note'>Vul eerst een geldige temperatuur in.</span>";
+        return;
+      }
+
+      let luchtschroef = 2.5; // basis
+      let weerType = "";
+      let uitleg = "";
+
+      if (t < 5) {
+        luchtschroef = 3.0;
+        weerType = "Zeer koud";
+        uitleg = "Lucht is erg dicht (veel zuurstof). Iets rijkere afstelling nodig → luchtschroef verder open.";
+      } else if (t >= 5 && t < 10) {
+        luchtschroef = 2.75;
+        weerType = "Koud";
+        uitleg = "Koude, dichte lucht. Iets rijker dan standaard → luchtschroef iets verder open dan 2½.";
+      } else if (t >= 10 && t <= 20) {
+        luchtschroef = 2.5;
+        weerType = "Normaal";
+        uitleg = "Gemiddelde omstandigheden. Standaard Rotax instelling werkt hier meestal goed.";
+      } else if (t > 20 && t <= 30) {
+        luchtschroef = 2.25;
+        weerType = "Warm";
+        uitleg = "Lucht is dunner, minder zuurstof. Iets armer → luchtschroef iets dichter.";
+      } else {
+        luchtschroef = 2.0;
+        weerType = "Zeer warm";
+        uitleg = "Zeer warme, dunne lucht. Vaak is een duidelijk armere afstelling nodig.";
+      }
+
+      const stationairUitleg =
+        "Draai de stationair schroef zo dat het stationair toerental rond de 2000–2200 rpm ligt. " +
+        "Als hij te snel blijft hangen → iets uitdraaien; als hij wil uitvallen → iets indraaien.";
+
+      resultDiv.innerHTML = `
+        <span class="tag">${weerType}</span>
+        <strong>Advies luchtschroef:</strong>
+        Ongeveer <strong>${luchtschroef.toFixed(2)} slagen open</strong> vanaf helemaal dicht.<br/>
+        <br/>
+        <strong>Advies stationair schroef:</strong><br/>
+        ${stationairUitleg}<br/><br/>
+        <span class="note">${uitleg}</span>
+      `;
+    }
+  </script>
+</body>
+</html>
