@@ -60,9 +60,7 @@
       background: #95a5a6;
       color: #fff;
     }
-    .btn-secondary:hover {
-      background: #7f8c8d;
-    }
+    .btn-secondary:hover { background: #7f8c8d; }
     #resultaat {
       margin-top: 20px;
       font-size: 18px;
@@ -85,9 +83,27 @@
       padding: 12px;
       border-top: 1px solid #b8dfc8;
       font-size: 15px;
-      color: #155f33;
       background: #ecf8f0;
       border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    .bougie-warm {
+      background: #fde8e8;
+      color: #b00000;
+    }
+    .bougie-normaal {
+      background: #e8f9ec;
+      color: #137c32;
+    }
+    .bougie-koud {
+      background: #e7f2fc;
+      color: #004f9f;
+    }
+    .bougie-icoon {
+      font-size: 20px;
     }
   </style>
 </head>
@@ -124,8 +140,9 @@
   <div id="density" class="extra-info"></div>
   <div id="extra" class="extra-info"></div>
 
-  <div id="bougie">
-    <strong>Advies bougie:</strong> nog geen berekening uitgevoerd.
+  <div id="bougie" class="bougie-normaal">
+    <span class="bougie-icoon">⚖️</span>
+    <span id="bougie-text"><strong>Advies bougie:</strong> nog geen berekening uitgevoerd.</span>
   </div>
 
   <script>
@@ -161,10 +178,27 @@
       return Math.round(Math.max(115, Math.min(155, jet)));
     }
 
-    function bougieAdvies(rho) {
-      if (rho > 1.220) return "🔥 Denso IW24 – koude/dichte lucht";
-      if (rho < 1.200) return "❄️ Denso IW29 – warme/dunne lucht";
-      return "⚖️ Denso IW27 – normale omstandigheden";
+    function updateBougie(rho) {
+      const bougieDiv = document.getElementById('bougie');
+      const bougieText = document.getElementById('bougie-text');
+      const icon = bougieDiv.querySelector(".bougie-icoon");
+
+      bougieDiv.className = "";
+      bougieDiv.classList.add("bougie-normaal");
+
+      if (rho > 1.220) {
+        bougieDiv.classList.replace("bougie-normaal", "bougie-warm");
+        icon.textContent = "🔥";
+        bougieText.innerHTML = "<strong>Advies bougie:</strong> Denso IW24 – koude/dichte lucht (meer warmte).";
+      } else if (rho < 1.200) {
+        bougieDiv.classList.replace("bougie-normaal", "bougie-koud");
+        icon.textContent = "❄️";
+        bougieText.innerHTML = "<strong>Advies bougie:</strong> Denso IW29 – warme/dunne lucht (koude bougie).";
+      } else {
+        icon.textContent = "⚖️";
+        bougieDiv.classList.replace("bougie-normaal", "bougie-normaal");
+        bougieText.innerHTML = "<strong>Advies bougie:</strong> Denso IW27 – normale omstandigheden.";
+      }
     }
 
     function berekenSproeier() {
@@ -177,7 +211,7 @@
         document.getElementById('resultaat').textContent = 'Vul alle velden goed in a.u.b.';
         document.getElementById('density').textContent = '';
         document.getElementById('extra').textContent = '';
-        document.getElementById('bougie').innerHTML = "<strong>Advies bougie:</strong> niet berekend (velden leeg).";
+        updateBougie(1.215);
         return;
       }
 
@@ -191,8 +225,7 @@
         ' kg/m³ (' + (delta >= 0 ? '+' : '') + delta.toFixed(1) + '% t.o.v. 1.225)';
       document.getElementById('extra').textContent = 'Controleer altijd bougiekleur en prestaties.';
 
-      document.getElementById('bougie').innerHTML =
-        '<strong>Advies bougie:</strong> ' + bougieAdvies(rho);
+      updateBougie(rho);
     }
 
     async function haalWeerViaGPS() {
@@ -236,7 +269,7 @@
       document.getElementById('resultaat').textContent = '';
       document.getElementById('density').textContent = '';
       document.getElementById('extra').textContent = '';
-      document.getElementById('bougie').innerHTML = "<strong>Advies bougie:</strong> nog geen berekening uitgevoerd.";
+      updateBougie(1.215);
     }
 
     document.getElementById('bereken').addEventListener('click', berekenSproeier);
