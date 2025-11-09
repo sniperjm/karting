@@ -80,6 +80,15 @@
       gap: 10px;
       margin-top: 20px;
     }
+    #bougie {
+      margin-top: 25px;
+      padding: 12px;
+      border-top: 1px solid #b8dfc8;
+      font-size: 15px;
+      color: #155f33;
+      background: #ecf8f0;
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
@@ -115,6 +124,10 @@
   <div id="density" class="extra-info"></div>
   <div id="extra" class="extra-info"></div>
 
+  <div id="bougie">
+    <strong>Advies bougie:</strong> nog geen berekening uitgevoerd.
+  </div>
+
   <script>
     const R_DROOG = 287.058, R_WATER = 461.495, RHO_REF = 1.225;
 
@@ -148,6 +161,12 @@
       return Math.round(Math.max(115, Math.min(155, jet)));
     }
 
+    function bougieAdvies(rho) {
+      if (rho > 1.220) return "🔥 Denso IW24 – koude/dichte lucht";
+      if (rho < 1.200) return "❄️ Denso IW29 – warme/dunne lucht";
+      return "⚖️ Denso IW27 – normale omstandigheden";
+    }
+
     function berekenSproeier() {
       const temp = parseFloat(document.getElementById('temp').value);
       const druk = parseFloat(document.getElementById('druk').value);
@@ -158,6 +177,7 @@
         document.getElementById('resultaat').textContent = 'Vul alle velden goed in a.u.b.';
         document.getElementById('density').textContent = '';
         document.getElementById('extra').textContent = '';
+        document.getElementById('bougie').innerHTML = "<strong>Advies bougie:</strong> niet berekend (velden leeg).";
         return;
       }
 
@@ -170,6 +190,9 @@
         'Luchtdichtheid: ' + rho.toFixed(3) +
         ' kg/m³ (' + (delta >= 0 ? '+' : '') + delta.toFixed(1) + '% t.o.v. 1.225)';
       document.getElementById('extra').textContent = 'Controleer altijd bougiekleur en prestaties.';
+
+      document.getElementById('bougie').innerHTML =
+        '<strong>Advies bougie:</strong> ' + bougieAdvies(rho);
     }
 
     async function haalWeerViaGPS() {
@@ -213,6 +236,7 @@
       document.getElementById('resultaat').textContent = '';
       document.getElementById('density').textContent = '';
       document.getElementById('extra').textContent = '';
+      document.getElementById('bougie').innerHTML = "<strong>Advies bougie:</strong> nog geen berekening uitgevoerd.";
     }
 
     document.getElementById('bereken').addEventListener('click', berekenSproeier);
