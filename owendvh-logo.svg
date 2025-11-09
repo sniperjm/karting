@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">OWENDVH Racing Logo</title>
+  <desc id="desc">Logo met rood-blauwe cirkel en witte kart contour</desc>
+  <defs>
+    <linearGradient id="ringHighlight" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff5474" />
+      <stop offset="100%" stop-color="#ff1c40" />
+    </linearGradient>
+    <linearGradient id="bannerGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#c21931" />
+      <stop offset="100%" stop-color="#ff2d55" />
+    </linearGradient>
+    <linearGradient id="blueAccent" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2b5cff" />
+      <stop offset="100%" stop-color="#1436b8" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.25" />
+    </filter>
+  </defs>
+
+  <g filter="url(#shadow)">
+    <circle cx="256" cy="256" r="212" fill="url(#ringHighlight)" />
+    <circle cx="256" cy="256" r="168" fill="none" stroke="url(#blueAccent)" stroke-width="32" />
+    <circle cx="256" cy="256" r="128" fill="#0f1115" />
+  </g>
+
+  <g transform="translate(0,-12)" fill="#fff" stroke="#000" stroke-width="18" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M173 270c-22-34-12-70 26-82 20-7 42-3 58 11 19-18 53-20 73-2 10 10 16 25 14 40 26 4 40 27 31 54-6 18-23 32-41 32h-162c-20 0-36-18-36-40 0-21 15-40 37-42z" fill="#fff" />
+    <path d="M186 292c-9-14-5-29 9-34 7-3 16-1 22 5 7-7 20-7 27 0 4 4 7 10 6 16 10 1 16 11 13 22-3 8-9 14-17 14h-60c-8 0-14-8-14-18 0-10 6-18 14-19z" fill="#0f1115" stroke="#fff" stroke-width="10" />
+    <circle cx="176" cy="308" r="26" fill="#0f1115" />
+    <circle cx="337" cy="308" r="26" fill="#0f1115" />
+    <path d="M227 227l24-26 38-6 31 14 17 32-18 30-49 12-43-12-20-34z" fill="#fff" />
+    <path d="M214 244l-28-6-23 30" fill="none" />
+    <path d="M321 246l34-8 27 33" fill="none" />
+  </g>
+
+  <g transform="translate(0,28)">
+    <path d="M96 332c0-22 18-40 40-40h240c22 0 40 18 40 40v32c0 14-11 25-25 25H121c-14 0-25-11-25-25z" fill="url(#bannerGradient)" stroke="#000" stroke-width="10" />
+    <path d="M120 324l272-12v28c0 18-14 32-32 32H152c-18 0-32-14-32-32z" fill="none" stroke="#1131a6" stroke-width="12" stroke-linejoin="round" />
+    <text x="256" y="356" font-family="'Montserrat', 'Segoe UI', sans-serif" font-size="54" font-weight="700" text-anchor="middle" fill="#fff" letter-spacing="6">OWENDVH</text>
+    <text x="256" y="396" font-family="'Montserrat', 'Segoe UI', sans-serif" font-size="40" font-weight="500" text-anchor="middle" fill="#fff" letter-spacing="8">RACING</text>
+  </g>
+</svg>
