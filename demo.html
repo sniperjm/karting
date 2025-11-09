@@ -94,7 +94,7 @@
   <label for="hoogte">Hoogte (m boven zeeniveau)</label>
   <input id="hoogte" type="number" value="10" />
 
-  <button onclick="berekenSproeier()">Bereken sproeier</button>
+  <button id="bereken" type="button">Bereken sproeier</button>
 
   <div id="resultaat"></div>
   <div id="density" class="extra-info"></div>
@@ -168,14 +168,27 @@
         '(Let op: dit is een DEMO-berekening – verifieer altijd met bougiekleur en prestaties.)';
     }
 
-    ['temp', 'druk', 'vocht', 'hoogte'].forEach(function(id) {
-      const el = document.getElementById(id);
-      if (el) {
-        el.addEventListener('input', berekenSproeier);
+    function initialiseer() {
+      const berekenKnop = document.getElementById('bereken');
+      if (berekenKnop) {
+        berekenKnop.addEventListener('click', berekenSproeier);
       }
-    });
 
-    berekenSproeier();
+      ['temp', 'druk', 'vocht', 'hoogte'].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('input', berekenSproeier);
+        }
+      });
+
+      berekenSproeier();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initialiseer);
+    } else {
+      initialiseer();
+    }
   </script>
 </body>
 </html>
