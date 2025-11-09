@@ -222,6 +222,51 @@
         grid-template-columns: minmax(0, 1fr);
       }
     }
+
+    /* Kleine knoppen voor de OTK-baseline toggle */
+    .baseline-toggle-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin: 6px 0 8px;
+    }
+
+    .baseline-btn {
+      flex: 0 0 auto;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.6);
+      background: rgba(15,23,42,0.9);
+      color: #e5e7eb;
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      text-transform: none;
+      letter-spacing: 0;
+      box-shadow: none;
+    }
+
+    .baseline-btn:hover {
+      filter: none;
+      transform: translateY(0);
+      box-shadow: 0 6px 16px rgba(15,23,42,0.6);
+      border-color: #22c55e;
+    }
+
+    .baseline-btn.active {
+      background: rgba(34,197,94,0.18);
+      border-color: #22c55e;
+      color: #bbf7d0;
+      box-shadow: 0 0 0 1px rgba(34,197,94,0.3);
+    }
+
+    .baseline-list {
+      font-size: 0.8rem;
+      margin: 0;
+      padding-left: 1.1rem;
+    }
+
+    .baseline-list li + li {
+      margin-top: 2px;
+    }
   </style>
 </head>
 <body>
@@ -229,7 +274,7 @@
     <h1>
       Kart Setup Helper
       <span class="badge">OTK / Tony Kart 401RR</span>
-      <span class="badge">v0.2 extended</span>
+      <span class="badge">v0.3 + OTK guide</span>
     </h1>
     <div class="subtitle">
       Kies wat je kart doet in de bocht en de baanconditie. De tool geeft
@@ -244,8 +289,8 @@
           <label for="symptom">1. Klacht / gevoel van de kart</label>
           <select id="symptom">
             <option value="">– Kies een symptoom –</option>
-            <option value="oversteer_entry">Overstuur vooral bij <b>ingaan</b> bocht</option>
-            <option value="oversteer_exit">Overstuur vooral bij <b>uitkomen</b> bocht</option>
+            <option value="oversteer_entry">Overstuur vooral bij ingaan bocht</option>
+            <option value="oversteer_exit">Overstuur vooral bij uitkomen bocht</option>
             <option value="understeer_entry">Onderstuur bij insturen (wil niet de bocht in)</option>
             <option value="understeer_exit">Onderstuur midden/uit de bocht (blijft wijd lopen)</option>
             <option value="hopping">Kart hopt / stuitert (meestal achterkant)</option>
@@ -273,6 +318,7 @@
 
           <div class="hint">
             Tip: verander altijd maar <strong>één of twee dingen tegelijk</strong> en noteer wat je doet.
+            Start liefst vanaf de <strong>OTK standaard setup</strong> (zie kaart rechts onderin).
           </div>
         </div>
 
@@ -294,9 +340,9 @@
                 <label for="axle">As-type</label>
                 <select id="axle">
                   <option value="">– Kies –</option>
-                  <option value="soft">Zacht</option>
-                  <option value="medium">Medium</option>
-                  <option value="hard">Hard</option>
+                  <option value="soft">Zacht (U / Q)</option>
+                  <option value="medium">Medium (N – standaard)</option>
+                  <option value="hard">Hard (H / HH)</option>
                 </select>
               </div>
             </div>
@@ -319,7 +365,7 @@
               </div>
               <div>
                 <label for="track_rear">Achterspoor (mm totaal)</label>
-                <input id="track_rear" placeholder="Bijv. 1400" />
+                <input id="track_rear" placeholder="Bijv. 1390 droog / 1340 regen" />
               </div>
             </div>
 
@@ -359,14 +405,33 @@
           </div>
         </div>
 
+        <!-- OTK BASELINE KAART -->
+        <div style="margin-top:10px;">
+          <div class="card" id="baselineCard">
+            <h2>
+              OTK standaard setup
+              <span>401RR</span>
+            </h2>
+            <small>Korte referentie uit de officiële OTK chassis setup guide voor een senior OTK/Tony Kart chassis (Mojo slicks).</small>
+
+            <div class="baseline-toggle-row">
+              <button type="button" class="baseline-btn active" data-mode="dry">Droog (slicks)</button>
+              <button type="button" class="baseline-btn" data-mode="wet">Regen (full wet)</button>
+            </div>
+
+            <div id="baselineContent"></div>
+          </div>
+        </div>
+
         <div class="footer">
-          v0.2 – uitgebreid met remstabiliteit, nervositeit rechtuit, teveel lift & intermediate condities.
+          v0.3 – uitgebreid met OTK standaardsetups (dry/wet) + extra uitleg over as-types & seat stays.
         </div>
       </div>
     </div>
   </div>
 
   <script>
+    // Data voor klachten → adviezen
     const setupData = {
       oversteer_entry: {
         title: "Overstuur vooral bij ingaan bocht",
@@ -390,7 +455,7 @@
           "Neem 1 tik caster weg als de kart heel veel lift geeft en daardoor de achterkant “los” maakt."
         ],
         big: [
-          "Monteer een zachtere as als de achterkant te stijf is en moeilijk tractie maakt.",
+          "Monteer een zachtere as als de achterkant te stijf is en moeilijk tractie maakt (bijv. van N naar U/Q).",
           "Zet de achterkant 1 klik hoger in rijhoogte voor meer grip achter (tenzij je last hebt van hoppen – kijk dan bij ‘Kart hopt / stuitert’).",
           "Voeg eventueel een extra seat stay toe aan de motorzijde voor meer belasting op de achteras."
         ],
@@ -447,7 +512,7 @@
         ],
         big: [
           "Zet de rijhoogte voor én achter 1 klik hoger voor meer gewichtsverplaatsing.",
-          "Gebruik een zachtere as zodat de achterkant makkelijker kan squatten.",
+          "Gebruik een zachtere as (bijv. U of Q) zodat de achterkant makkelijker kan squatten.",
           "Stoel iets hoger plaatsen om het zwaartepunt te verhogen en de kart meer te laten werken."
         ],
         notes: "In low grip mag de kart best wat bewegen. Liever een beetje levendig dan dood en glijdend."
@@ -512,7 +577,7 @@
         title: "Regen / full wet setup",
         small: [
           "Verhoog bandendruk t.o.v. droog om de banden sneller warm te krijgen.",
-          "Maak de achterspoor smaller voor meer tractie.",
+          "Maak de achterspoor smaller voor meer tractie (richting ~1340 mm voor senior).",
           "Voeg 1–2 tikken caster toe voor scherper insturen en meer lift."
         ],
         big: [
@@ -524,6 +589,44 @@
       }
     };
 
+    // OTK standaard setup (uit de PDF) – droog & regen
+    const otkBaseline = {
+      dry: {
+        title: "Standaard droog (slicks)",
+        lines: [
+          "<strong>Front breedte</strong>: standaard met één grote vulring buiten per kant, standaard hubs (± 15 mm).",
+          "<strong>Front rijhoogte</strong>: middenpositie (1 ring boven, 1 onder de kingpin).",
+          "<strong>Front torsiestang</strong>: platte stang horizontaal gemonteerd (standaard, vrij stijf).",
+          "<strong>Toe-out</strong>: ongeveer 1 mm toe-out totaal.",
+          "<strong>Camber</strong>: neutraal – beide excenter-pijlen (boven & onder) naar voren.",
+          "<strong>Caster</strong>: neutraal – beide pijlen naar voren.",
+          "<strong>Achterbreedte</strong>: ongeveer 1390 mm (senior, slicks).",
+          "<strong>Achter hubs</strong>: standaard OTK/MXP (± 92 mm mag).",
+          "<strong>Achter rijhoogte</strong>: middenpositie.",
+          "<strong>Achter torsiestang</strong>: geen achterbar gemonteerd.",
+          "<strong>Seat stays</strong>: één extra steun per kant.",
+          "<strong>Wielen</strong>: MXP magnesiumm velgen 130/210 (standaard)."
+        ]
+      },
+      wet: {
+        title: "Standaard regen (full wet)",
+        lines: [
+          "<strong>Front breedte</strong>: zo breed mogelijk – lange front hubs, veel spacers (maximale front grip).",
+          "<strong>Front rijhoogte</strong>: middenpositie (vaak voldoende, eventueel hoger bij veel plassen).",
+          "<strong>Front torsiestang</strong>: ronde bar bruin (hard) of platte stang verticaal voor extra front bite.",
+          "<strong>Toe-out</strong>: ± 4 mm per kant (veel toe-out voor scherp insturen in nat).",
+          "<strong>Camber</strong>: 1 klik positieve camber boven (meer grip midden/exit bocht).",
+          "<strong>Caster</strong>: top-pijl naar voren, onderste pijl naar achter (meer caster dan neutraal).",
+          "<strong>Achterbreedte</strong>: rond 1340 mm (smaller voor meer zijgrip/tractie).",
+          "<strong>Achter hubs</strong>: standaard achterhubs.",
+          "<strong>Achter rijhoogte</strong>: midden (soms 1 klik hoger voor extra mechanische grip).",
+          "<strong>Achter torsiestang</strong>: geen achterbar (kart moet nog kunnen werken/flexen).",
+          "<strong>Seat stays</strong>: één extra steun per kant (eventueel meer voor extra rear grip).",
+          "<strong>Wielen</strong>: AXP aluminium 120/180 (warmt sneller op, meer grip in regen)."
+        ]
+      }
+    };
+
     function getAdvice(symptom, condition) {
       const base = setupData[symptom];
       if (!base) return null;
@@ -532,7 +635,7 @@
 
       if (condition === "dry_low" && symptom !== "rain") {
         extraNotes.push(
-          "Baanconditie: droog met weinig grip → durf iets agressiever met caster/rijhoogte en een zachtere as te gaan."
+          "Baanconditie: droog met weinig grip → durf iets agressiever met caster/rijhoogte en een zachtere as (U/Q) te gaan."
         );
       }
 
@@ -600,12 +703,48 @@
       `;
     }
 
+    function renderBaseline(mode) {
+      const baselineContent = document.getElementById("baselineContent");
+      const data = otkBaseline[mode] || otkBaseline.dry;
+
+      const listHtml = data.lines.map(line => `<li>${line}</li>`).join("");
+
+      baselineContent.innerHTML = `
+        <strong style="font-size:0.8rem;">${data.title}</strong>
+        <ul class="baseline-list">
+          ${listHtml}
+        </ul>
+      `;
+
+      // active knop styling
+      const buttons = document.querySelectorAll(".baseline-btn");
+      buttons.forEach(btn => {
+        if (btn.getAttribute("data-mode") === mode) {
+          btn.classList.add("active");
+        } else {
+          btn.classList.remove("active");
+        }
+      });
+    }
+
+    // Init event listeners
     document.getElementById("showAdvice").addEventListener("click", () => {
       const symptom = document.getElementById("symptom").value;
       const condition = document.getElementById("condition").value;
       const advice = getAdvice(symptom, condition);
       renderAdvice(advice);
     });
+
+    // Toggle voor OTK-baseline
+    document.querySelectorAll(".baseline-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const mode = btn.getAttribute("data-mode");
+        renderBaseline(mode);
+      });
+    });
+
+    // Start met droge standaard setup zichtbaar
+    renderBaseline("dry");
   </script>
 </body>
 </html>
