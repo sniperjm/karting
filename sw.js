@@ -7,7 +7,7 @@ self.addEventListener('install', (e) => {
         './index.html',
         './manifest.webmanifest',
         './icon-512.png',
-        './logo.png'
+        './owendvh-logo.svg'
       ]);
     })
   );
