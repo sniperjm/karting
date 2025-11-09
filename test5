@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>JanFred Sproeier Calculator</title>
+  <meta name="theme-color" content="#ff2d55">
+
+  <style>
+    /* ====== BASIS STIJL ====== */
+    :root {
+      --bg:#0f1115;
+      --panel:#161a22;
+      --text:#e8ecf1;
+      --muted:#9aa4b2;
+      --accent:#ff2d55;
+      --good:#2ecc71;
+      --border:#252b36;
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      background:var(--bg);
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      margin:0;
+      padding:0;
+    }
+
+    /* ====== HEADER MET LOGO ====== */
+    header{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:14px 14px;
+      min-height:80px;
+      border-bottom:1px solid var(--border);
+    }
+    .logo{
+      height:60px;
+      width:auto;
+      flex:0 0 auto;
+      filter:saturate(110%);
+    }
+    .titlewrap{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      min-width:0;
+    }
+    h1{
+      font-size:22px;
+      margin:0;
+      line-height:1.15;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    header p{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    /* ====== KAARTEN / LAY-OUT ====== */
+    .card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:14px;
+      margin:14px;
+      padding:14px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+    .full{ grid-column:1 / -1; }
+
+    label{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:6px;
+    }
+
+    input,select{
+      width:100%;
+      padding:12px 11px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:#0c0f14;
+      color:var(--text);
+      font-size:16px;
+    }
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button{
+      -webkit-appearance:none;
+      margin:0;
+    }
+
+    .row{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .result{
+      font-size:42px;
+      font-weight:800;
+      margin:0;
+    }
+
+    .tag{
+      display:inline-block;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:12px;
+      margin-left:8px;
+      border:1px solid var(--border);
+      background:#0c0f14;
+      color:var(--muted);
+    }
+    .tag.lean{ color:#e74c3c; }
+    .tag.rich{ color:var(--good); }
+
+    .soft{
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .btn{
+      display:inline-block;
+      padding:12px 16px;
+      border-radius:12px;
+      background:var(--accent);
+      color:white;
+      text-align:center;
+      text-decoration:none;
+      font-weight:700;
+      border:none;
+    }
+
+    .inline{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .footer{
+      padding:12px 16px 24px;
+      color:var(--muted);
+      font-size:12px;
+      text-align:center;
+    }
+
+    .mode{ font-weight:700; }
+    .plug{ font-weight:700; }
+  </style>
+</head>
+<body>
+  <!-- ====== HEADER MET LOGO LINKS ====== -->
+  <!-- Zorg dat logo.png in dezelfde map staat als deze index.html -->
+  <header>
+    <img class="logo" src="logo.png" alt="Racing Team Cura logo">
+    <div class="titlewrap">
+      <h1>JanFred Sproeier Calculator</h1>
+      <p id="subtitle">
+        Rotax Max Senior EVO • <span class="mode">Prisma-modus</span> (baseline 133 @ 1.225 kg/m³)
+      </p>
+    </div>
+  </header>
+
+  <!-- ====== BASIS INVOER ====== -->
+  <section class="card">
+    <div class="grid">
+      <div class="full">
+        <label>Modus</label>
+        <select id="mode">
+          <option value="prisma" selected>Prisma-modus (matcht officiële Prisma-calculator)</option>
+          <option value="rule">Vuistregel-modus (1 jet / 1% ρ, baseline 131)</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Temperatuur (°C)</label>
+        <input type="number" id="temp" inputmode="decimal" value="20" />
+      </div>
+
+      <div>
+        <label>Luchtdruk (hPa)</label>
+        <input type="number" id="pressure" inputmode="decimal" value="1001.0" />
+      </div>
+
+      <div>
+        <label>Relatieve Vochtigheid (%)</label>
+        <input type="number" id="rh" inputmode="decimal" value="57" />
+      </div>
+
+      <div>
+        <label>Hoogte (m)</label>
+        <input type="number" id="alt" inputmode="decimal" value="100" />
+      </div>
+
+      <div class="full">
+        <label>Luchtdichtheid (kg/m³)
+          <span class="soft">(optioneel – overschrijft de berekening)</span>
+        </label>
+        <input type="number" id="rho" inputmode="decimal" step="0.001" value="1.183" />
+      </div>
+    </div>
+
+    <div style="margin-top:12px" class="inline">
+      <div class="soft">
+        Als <b>luchtdichtheid</b> is ingevuld, wordt die gebruikt.
+        Anders wordt ρ berekend uit T, P, rH.
+      </div>
+      <button id="useCalc" class="btn" style="background:#1d7cf2">
+        Gebruik berekende ρ
+      </button>
+    </div>
+  </section>
+
+  <!-- ====== WEER VIA GPS ====== -->
+  <section class="card">
+    <label>Weer via GPS (optioneel)</label>
+    <div class="inline" style="margin-top:6px">
+      <button id="fetchWeather" class="btn">🌤 Haal weer op via GPS</button>
+      <span id="weatherStatus" class="soft">
+        Werkt alleen met internet + GPS-toestemming.
+      </span>
+    </div>
+  </section>
+
+  <!-- ====== SPROEIER ADVIES ====== -->
+  <section class="card">
+    <div class="inline">
+      <div>
+        <div class="soft">Aanbevolen sproeier</div>
+        <div class="row" style="align-items:baseline;gap:10px">
+          <h2 id="jet" class="result">—</h2>
+          <span id="flag" class="tag">—</span>
+        </div>
+      </div>
+
+      <div>
+        <label for="baseline" class="soft">Baseline (alleen in Vuistregel)</label>
+        <input id="baseline" type="number" value="131" min="120" max="140" />
+      </div>
+    </div>
+
+    <div class="soft" style="margin-top:8px" id="ruleNote">
+      Vuistregel: ~<b>1 jet per 1% ρ-verandering</b> t.o.v. 1.225 kg/m³.
+      Startpunt – verifieer met bougiekleur &amp; prestaties.
+    </div>
+    <div class="soft" style="margin-top:8px;display:none" id="prismaNote">
+      Prisma: <b>1.47 jet per 1% ρ-verandering</b> t.o.v. 1.225 kg/m³, baseline 133.
+      Afgerond op hele jets.
+    </div>
+  </section>
+
+  <!-- ====== BOUGIE ADVIES ====== -->
+  <section class="card">
+    <div class="grid">
+      <div class="full">
+        <label>Aanbevolen bougie (automatisch)</label>
+        <div id="plugLine" class="row">
+          <div id="plugIcon" style="font-size:20px">⚖️</div>
+          <div id="plugText" class="plug">Denso IW27 (gap 0.6 mm)</div>
+        </div>
+        <div class="soft">
+          Regels: &gt; 1.220 kg/m³ → 🔥 IW24 · 1.200–1.220 → ⚖️ IW27 · &lt; 1.200 → ❄️ IW29
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== FOOTER ====== -->
+  <section class="footer">
+    <div>
+      Installeer via Safari: Deel ⟶ ‘Zet op beginscherm’.<br>
+      Werkt offline. GPS-weer werkt alleen met internet.
+    </div>
+  </section>
+
+<script>
+  // ====== CONSTANTEN ======
+  const R_d = 287.058;
+  const R_v = 461.495;
+  const RHO_STD = 1.225;
+
+  const MODES = {
+    prisma: { baseline: 133, slope: 1.47 },
+    rule:   { baseline: null, slope: 1.0 } // baseline uit input
+  };
+
+  // ====== FYSICA FUNCTIES ======
+  function es_hPa(Tc){
+    return 6.112 * Math.exp((17.62 * Tc) / (243.12 + Tc));
+  }
+
+  function computeDensity(Tc, P_hPa, RH){
+    const T = Tc + 273.15;
+    const P = P_hPa * 100;
+    const e = es_hPa(Tc) * (RH/100);
+    const e_Pa = e * 100;
+    const Pd = P - e_Pa;
+    return (Pd / (R_d * T)) + (e_Pa / (R_v * T));
+  }
+
+  function densityPercentDelta(rho){
+    return ((rho - RHO_STD) / RHO_STD) * 100.0;
+  }
+
+  function clamp(v, lo, hi){
+    return Math.max(lo, Math.min(hi, v));
+  }
+
+  // ====== SPROEIER BEREKENING ======
+  function recommendJet(rho, mode, baselineInput){
+    const dPct = densityPercentDelta(rho);
+    let baseline = baselineInput;
+
+    if(mode === 'prisma'){
+      baseline = MODES.prisma.baseline;
+    }
+
+    let slope = (mode === 'prisma') ? MODES.prisma.slope : MODES.rule.slope;
+    let jet = baseline + dPct * slope;
+    jet = Math.round(jet);
+
+    return clamp(jet, 115, 155);
+  }
+
+  // ====== BOUGIE LOGICA ======
+  function recommendPlug(rho){
+    if (rho > 1.220) return { icon: "🔥", text: "Denso IW24 (gap 0.6 mm)" };
+    if (rho < 1.200) return { icon: "❄️", text: "Denso IW29 (gap 0.6 mm)" };
+    return { icon: "⚖️", text: "Denso IW27 (gap 0.6 mm)" };
+  }
+
+  // ====== SCHERM UPDATEN ======
+  function update(){
+    const Tc = parseFloat(document.getElementById('temp').value || "20");
+    const P  = parseFloat(document.getElementById('pressure').value || "1013.25");
+    const RH = parseFloat(document.getElementById('rh').value || "50");
+    const mode = document.getElementById('mode').value;
+    const baselineInput = parseFloat(document.getElementById('baseline').value || "131");
+
+    // Tekst bij modus
+    document.getElementById('ruleNote').style.display   = (mode === 'rule')   ? 'block' : 'none';
+    document.getElementById('prismaNote').style.display = (mode === 'prisma') ? 'block' : 'none';
+    document.getElementById('subtitle').innerHTML =
+      (mode === 'prisma')
+        ? "Rotax Max Senior EVO • <span class='mode'>Prisma-modus</span> (baseline 133 @ 1.225 kg/m³)"
+        : "Rotax Max Senior EVO • <span class='mode'>Vuistregel-modus</span> (baseline aanpasbaar)";
+
+    // Luchtdichtheid
+    let rhoInput = document.getElementById('rho').value;
+    let rho = (rhoInput !== "") ? parseFloat(rhoInput) : computeDensity(Tc, P, RH);
+
+    // Sproeier
+    const jet = recommendJet(rho, mode, baselineInput);
+    const dPct = densityPercentDelta(rho);
+
+    document.getElementById('jet').textContent = isFinite(jet) ? jet : "—";
+    const flag = document.getElementById('flag');
+    flag.textContent = (dPct > 0 ? "+" : "") + dPct.toFixed(1) + "% ρ";
+    flag.className = "tag " + (dPct > 0 ? "rich" : "lean");
+
+    // Bougie
+    const plug = recommendPlug(rho);
+    document.getElementById('plugIcon').textContent = plug.icon;
+    document.getElementById('plugText').textContent = plug.text;
+  }
+
+  // ====== WEER VIA GPS + API ======
+  async function fetchWeatherFromGPS(){
+    const statusEl = document.getElementById('weatherStatus');
+    statusEl.textContent = "GPS zoeken…";
+
+    if (!navigator.geolocation){
+      statusEl.textContent = "GPS niet beschikbaar op dit apparaat.";
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const { latitude, longitude } = pos.coords;
+      statusEl.textContent = "Weer ophalen…";
+
+      try {
+        // Voorbeeld-API: Open-Meteo (geen API-key nodig)
+        const url =
+          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}` +
+          `&current=temperature_2m,relative_humidity_2m,pressure_msl`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const cur = data.current;
+
+        const temp = cur.temperature_2m;
+        const pressure = cur.pressure_msl;
+        const rh = cur.relative_humidity_2m;
+
+        // Velden invullen
+        document.getElementById('temp').value     = temp.toFixed(1);
+        document.getElementById('pressure').value = pressure.toFixed(1);
+        document.getElementById('rh').value       = rh.toFixed(0);
+
+        // Laatste weerdata bewaren (voor offline start)
+        localStorage.setItem("lastWeather", JSON.stringify({
+          temp, pressure, rh, time: new Date().toISOString()
+        }));
+
+        statusEl.textContent = "Weer geladen. Waarden zijn ingevuld en kun je handmatig aanpassen.";
+        update();
+      } catch (e) {
+        statusEl.textContent = "Kon weer niet ophalen (geen internet of API-fout).";
+      }
+    }, (err) => {
+      document.getElementById('weatherStatus').textContent = "GPS afgewezen of mislukt.";
+    });
+  }
+
+  // ====== INIT ======
+  document.addEventListener('DOMContentLoaded', () => {
+    // Inputs luisteren
+    document.querySelectorAll("input,select").forEach(el =>
+      el.addEventListener('input', update)
+    );
+
+    // Knop: ρ berekenen
+    document.getElementById('useCalc').addEventListener('click', () => {
+      const Tc = parseFloat(document.getElementById('temp').value || "20");
+      const P  = parseFloat(document.getElementById('pressure').value || "1013.25");
+      const RH = parseFloat(document.getElementById('rh').value || "50");
+      const rho = computeDensity(Tc, P, RH);
+      document.getElementById('rho').value = rho.toFixed(3);
+      update();
+    });
+
+    // Knop: weer via GPS
+    document.getElementById('fetchWeather').addEventListener('click', fetchWeatherFromGPS);
+
+    // Laatste weerdata uit localStorage (indien aanwezig)
+    const saved = localStorage.getItem("lastWeather");
+    if (saved){
+      try {
+        const w = JSON.parse(saved);
+        if (w.temp     !== undefined) document.getElementById('temp').value     = w.temp;
+        if (w.pressure !== undefined) document.getElementById('pressure').value = w.pressure;
+        if (w.rh       !== undefined) document.getElementById('rh').value       = w.rh;
+        document.getElementById('weatherStatus').textContent =
+          "Laatst gebruikte weerdata uit opslag. Controleer en corrigeer zo nodig.";
+      } catch(e){}
+    }
+
+    // Eerste keer rekenen
+    update();
+  });
+</script>
+</body>
+</html>
