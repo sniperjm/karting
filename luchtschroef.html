@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8" />
-  <title>Rotax Luchtschroef & Stationair Helper</title>
+  <title>Rotax EVO Luchtschroef & Stationair Helper</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
@@ -93,13 +93,18 @@
   </style>
 </head>
 <body>
-  <h1>Rotax Luchtschroef & Stationair</h1>
+  <h1>Rotax Max EVO<br>Luchtschroef & Stationair</h1>
 
   <div class="card">
     <p class="note">
-      Gebruik de <strong>Rotax Jetting / Jetting Max EVO app</strong> voor de hoofdsproeier.
-      Deze tool helpt alleen met de <strong>luchtschroef</strong> en <strong>stationair schroef</strong>
+      Voor de <strong>nieuwe Rotax Max EVO</strong> met Dell'Orto VHSB 34.
+      Gebruik de <strong>Rotax Jetting / Jetting Max EVO app</strong> voor de
+      hoofdsproeier. Deze tool helpt alleen met de
+      <strong>luchtschroef</strong> en <strong>stationair schroef</strong>
       op basis van de temperatuur.
+      <br><br>
+      <strong>Fabrieksbasis Rotax EVO:</strong> luchtschroef
+      <strong>1½ slag open</strong> vanaf helemaal dicht.
     </p>
   </div>
 
@@ -115,9 +120,9 @@
   <div class="card">
     <strong>Snelle check tijdens rijden</strong>
     <ul class="note">
-      <li>Bij gas dicht → motor komt langzaam terug naar laag stationair = meestal <em>iets te arm</em> → luchtschroef iets dicht.</li>
-      <li>Bij gas geven → motor verslikt of smoort = vaak <em>te rijk</em> → luchtschroef iets open.</li>
-      <li>Blok valt snel uit bij stationair = stationair schroef iets indraaien.</li>
+      <li>Bij gas dicht → toerental blijft hoog hangen = vaak <em>te arm</em> → luchtschroef iets <strong>dichter</strong>.</li>
+      <li>Bij gas geven → motor verslikt / smoort = vaak <em>te rijk</em> → luchtschroef iets <strong>verder open</strong>.</li>
+      <li>Blok valt snel uit bij stationair = stationair schroef iets <strong>indraaien</strong>.</li>
     </ul>
   </div>
 
@@ -132,30 +137,23 @@
         return;
       }
 
-      let luchtschroef = 2.5; // basis
+      // Rotax Max EVO fabriek: 1.5 slagen open, kleine correcties op temperatuur
+      let luchtschroef = 1.5;
       let weerType = "";
       let uitleg = "";
 
-      if (t < 5) {
-        luchtschroef = 3.0;
-        weerType = "Zeer koud";
-        uitleg = "Lucht is erg dicht (veel zuurstof). Iets rijkere afstelling nodig → luchtschroef verder open.";
-      } else if (t >= 5 && t < 10) {
-        luchtschroef = 2.75;
+      if (t < 10) {
+        luchtschroef = 1.75;
         weerType = "Koud";
-        uitleg = "Koude, dichte lucht. Iets rijker dan standaard → luchtschroef iets verder open dan 2½.";
-      } else if (t >= 10 && t <= 20) {
-        luchtschroef = 2.5;
+        uitleg = "Koude, dichte lucht. Iets rijkere afstelling dan standaard → luchtschroef iets verder open dan 1½ slag.";
+      } else if (t >= 10 && t <= 25) {
+        luchtschroef = 1.5;
         weerType = "Normaal";
-        uitleg = "Gemiddelde omstandigheden. Standaard Rotax instelling werkt hier meestal goed.";
-      } else if (t > 20 && t <= 30) {
-        luchtschroef = 2.25;
-        weerType = "Warm";
-        uitleg = "Lucht is dunner, minder zuurstof. Iets armer → luchtschroef iets dichter.";
+        uitleg = "Gemiddelde omstandigheden. Dit komt overeen met de fabrieksinstelling van Rotax EVO (1½ slag open).";
       } else {
-        luchtschroef = 2.0;
-        weerType = "Zeer warm";
-        uitleg = "Zeer warme, dunne lucht. Vaak is een duidelijk armere afstelling nodig.";
+        luchtschroef = 1.25;
+        weerType = "Warm";
+        uitleg = "Warme, dunnere lucht. Iets armere afstelling nodig → luchtschroef iets dichter dan 1½ slag.";
       }
 
       const stationairUitleg =
@@ -164,7 +162,7 @@
 
       resultDiv.innerHTML = `
         <span class="tag">${weerType}</span>
-        <strong>Advies luchtschroef:</strong>
+        <strong>Advies luchtschroef (Rotax EVO):</strong>
         Ongeveer <strong>${luchtschroef.toFixed(2)} slagen open</strong> vanaf helemaal dicht.<br/>
         <br/>
         <strong>Advies stationair schroef:</strong><br/>
