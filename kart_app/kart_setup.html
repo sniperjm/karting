@@ -28,6 +28,7 @@
       box-shadow: 0 20px 45px rgba(0,0,0,0.6);
       border: 1px solid rgba(148,163,184,0.35);
       backdrop-filter: blur(12px);
+      position: relative; /* nodig voor logo rechtsboven */
     }
 
     h1 {
@@ -229,35 +230,28 @@
       }
     }
 
-    /* Header met logo */
+    /* Header zonder logo-logica (logo is absolute) */
     .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .header-left {
       display: flex;
       flex-direction: column;
       gap: 4px;
     }
 
+    /* LOGO echt rechtsboven in de kaart */
     .rtc-logo {
-      height: 52px;
+      position: absolute;
+      top: 16px;
+      right: 18px;
+      height: 70px;
       width: auto;
       object-fit: contain;
     }
 
     @media (max-width: 600px) {
-      .header {
-        flex-direction: row;
-        align-items: flex-start;
-      }
-
       .rtc-logo {
-        height: 42px;
+        height: 60px;
+        top: 14px;
+        right: 14px;
       }
     }
 
@@ -310,27 +304,24 @@
 </head>
 <body>
   <div class="app">
-    <!-- HEADER + LOGO -->
-    <div class="header">
-      <div class="header-left">
-        <h1>
-          Kart Setup Helper
-          <span class="badge">OTK / Tony Kart 401RR</span>
-          <span class="badge">v0.3 + OTK guide</span>
-        </h1>
-        <div class="subtitle">
-          Kies wat je kart doet in de bocht en de baanconditie. De tool geeft
-          een paar <strong>eerst-proberen</strong> stappen en daarna grotere veranderingen.
-          Zie het als richtlijn – uiteindelijk beslist de stopwatch. ⏱️
-        </div>
-      </div>
+    <!-- LOGO RECHTSBOVEN -->
+    <img
+      src="logo racing team cura.png"
+      alt="Racing Team Cura"
+      class="rtc-logo"
+    />
 
-      <!-- LOGO RECHTSBOVEN -->
-      <img
-        src="racing-team-cura-logo.png"
-        alt="Racing Team Cura"
-        class="rtc-logo"
-      />
+    <div class="header">
+      <h1>
+        Kart Setup Helper
+        <span class="badge">OTK / Tony Kart 401RR</span>
+        <span class="badge">v0.3 + OTK guide</span>
+      </h1>
+      <div class="subtitle">
+        Kies wat je kart doet in de bocht en de baanconditie. De tool geeft
+        een paar <strong>eerst-proberen</strong> stappen en daarna grotere veranderingen.
+        Zie het als richtlijn – uiteindelijk beslist de stopwatch. ⏱️
+      </div>
     </div>
 
     <div class="layout">
@@ -380,7 +371,7 @@
               Huidige setup & notities
               <span>Extra</span>
             </h2>
-            <small>Gebruik dit blok om je huidige baseline te noteren (banden, spoor, as, etc.). Wordt niet automatisch gebruikt in de berekening, maar is handig als logboek.</small>
+            <small>Gebruik dit blok om je huidige baseline te noteren (banden, spoor, as, caster/camber, etc.). Wordt niet automatisch gebruikt in de berekening, maar is handig als logboek.</small>
 
             <div class="two-cols">
               <div>
@@ -398,18 +389,31 @@
               </div>
             </div>
 
+            <!-- BANDENDRUK PER BAND -->
             <div class="two-cols" style="margin-top:6px;">
               <div>
-                <label for="pressure_front">Bandendruk voor (bar)</label>
-                <input id="pressure_front" placeholder="Bijv. 0.90" />
+                <label for="pressure_fl">Bandendruk voor links (bar)</label>
+                <input id="pressure_fl" placeholder="Bijv. 0.88" />
               </div>
               <div>
-                <label for="pressure_rear">Bandendruk achter (bar)</label>
-                <input id="pressure_rear" placeholder="Bijv. 0.95" />
+                <label for="pressure_fr">Bandendruk voor rechts (bar)</label>
+                <input id="pressure_fr" placeholder="Bijv. 0.90" />
               </div>
             </div>
 
-            <div class="two-cols" style="margin-top:6px%;">
+            <div class="two-cols" style="margin-top:6px;">
+              <div>
+                <label for="pressure_rl">Bandendruk achter links (bar)</label>
+                <input id="pressure_rl" placeholder="Bijv. 0.94" />
+              </div>
+              <div>
+                <label for="pressure_rr">Bandendruk achter rechts (bar)</label>
+                <input id="pressure_rr" placeholder="Bijv. 0.96" />
+              </div>
+            </div>
+
+            <!-- SPOOR -->
+            <div class="two-cols" style="margin-top:6px;">
               <div>
                 <label for="track_front">Voorspoor (mm totaal)</label>
                 <input id="track_front" placeholder="Bijv. 1200" />
@@ -417,6 +421,18 @@
               <div>
                 <label for="track_rear">Achterspoor (mm totaal)</label>
                 <input id="track_rear" placeholder="Bijv. 1390 droog / 1340 regen" />
+              </div>
+            </div>
+
+            <!-- CASTER / CAMBER -->
+            <div class="two-cols" style="margin-top:6px;">
+              <div>
+                <label for="caster">Caster instelling</label>
+                <input id="caster" placeholder="Bijv. neutraal / +1 klik" />
+              </div>
+              <div>
+                <label for="camber">Camber instelling</label>
+                <input id="camber" placeholder="Bijv. neutraal / -1 mm" />
               </div>
             </div>
 
