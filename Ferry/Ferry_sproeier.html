@@ -192,29 +192,60 @@
 
       <div>
         <label>Temperatuur (°C)</label>
-        <input type="number" id="temp" inputmode="decimal" value="20" />
+        <input
+          type="text"
+          id="temp"
+          inputmode="decimal"
+          pattern="^-?[0-9]*[.,]?[0-9]*$"
+          value="20"
+        />
       </div>
 
       <div>
         <label>Luchtdruk (hPa)</label>
-        <input type="number" id="pressure" inputmode="decimal" value="1001.0" />
+        <input
+          type="text"
+          id="pressure"
+          inputmode="decimal"
+          pattern="^-?[0-9]*[.,]?[0-9]*$"
+          value="1001.0"
+        />
       </div>
 
       <div>
         <label>Relatieve Vochtigheid (%)</label>
-        <input type="number" id="rh" inputmode="decimal" value="57" />
+        <input
+          type="text"
+          id="rh"
+          inputmode="decimal"
+          pattern="^-?[0-9]*[.,]?[0-9]*$"
+          value="57"
+        />
       </div>
 
       <div>
         <label>Hoogte (m)</label>
-        <input type="number" id="alt" inputmode="decimal" value="100" />
+        <input
+          type="text"
+          id="alt"
+          inputmode="decimal"
+          pattern="^-?[0-9]*[.,]?[0-9]*$"
+          value="100"
+        />
       </div>
 
       <div class="full">
         <label>Luchtdichtheid (kg/m³)
           <span class="soft">(optioneel – overschrijft de berekening)</span>
         </label>
-        <input type="number" id="rho" inputmode="decimal" step="0.001" value="1.183" />
+        <input
+          type="text"
+          id="rho"
+          inputmode="decimal"
+          pattern="^-?[0-9]*[.,]?[0-9]*$"
+          step="0.001"
+          value="1.183"
+        />
       </div>
     </div>
 
@@ -314,6 +345,16 @@
     rule:   { baseline: null, slope: 1.0 } // baseline uit input
   };
 
+  // Kleine helper: leest input, vervangt komma door punt en parseFloat
+  function readInputNumber(id, fallbackStr){
+    const el = document.getElementById(id);
+    if (!el) return parseFloat(fallbackStr);
+    let raw = String(el.value || "").trim().replace(',', '.');
+    const num = parseFloat(raw);
+    if (Number.isFinite(num)) return num;
+    return parseFloat(fallbackStr);
+  }
+
   // ====== FYSICA FUNCTIES ======
   function es_hPa(Tc){
     return 6.112 * Math.exp((17.62 * Tc) / (243.12 + Tc));
@@ -383,15 +424,17 @@
 
   // ====== SCHERM UPDATEN ======
   function update(){
-    const Tc = parseFloat(document.getElementById('temp').value || "20");
-    const RH = parseFloat(document.getElementById('rh').value || "50");
-    const altitude = parseFloat(document.getElementById('alt').value || "0");
-    const pressureInput = document.getElementById('pressure').value;
-    const P = (pressureInput !== "")
-      ? parseFloat(pressureInput)
+    const Tc = readInputNumber('temp', "20");
+    const RH = readInputNumber('rh', "50");
+    const altitude = readInputNumber('alt', "0");
+
+    const pressureRaw = document.getElementById('pressure').value;
+    const P = (pressureRaw !== "")
+      ? readInputNumber('pressure', String(SEA_LEVEL_PRESSURE_HPA))
       : standardPressureAtAltitude(altitude);
+
     const mode = document.getElementById('mode').value;
-    const baselineInput = parseFloat(document.getElementById('baseline').value || "131");
+    const baselineInput = readInputNumber('baseline', "131");
 
     // Tekst bij modus
     document.getElementById('ruleNote').style.display   = (mode === 'rule')   ? 'block' : 'none';
@@ -402,7 +445,8 @@
         : "Rotax Max Senior EVO • <span class='mode'>Vuistregel-modus</span> (baseline aanpasbaar)";
 
     // Luchtdichtheid
-    let rhoInput = document.getElementById('rho').value;
+    let rhoInput = document.getElementById('rho').value.trim();
+    if (rhoInput !== "") rhoInput = rhoInput.replace(',', '.');
     let rho = (rhoInput !== "") ? parseFloat(rhoInput) : computeDensity(Tc, P, RH);
 
     // Sproeier
@@ -433,6 +477,9 @@
   let weatherStatusBase = "";
 
   function coerceNumber(value, fallback){
+    if (typeof value === "string") {
+      value = value.replace(',', '.');
+    }
     const num = parseFloat(value);
     return Number.isFinite(num) ? num : fallback;
   }
@@ -478,7 +525,7 @@
 
         const temp = cur.temperature_2m;
         const pressureMsl = cur.pressure_msl;
-        const altitude = parseFloat(document.getElementById('alt').value || "0");
+        const altitude = readInputNumber('alt', "0");
         const stationPressure = seaLevelToStationPressure(pressureMsl, altitude, temp);
         const rh = cur.relative_humidity_2m;
 
@@ -549,12 +596,12 @@
 
     // Knop: ρ berekenen
     document.getElementById('useCalc').addEventListener('click', () => {
-      const Tc = parseFloat(document.getElementById('temp').value || "20");
-      const RH = parseFloat(document.getElementById('rh').value || "50");
-      const altitude = parseFloat(document.getElementById('alt').value || "0");
-      const pressureInput = document.getElementById('pressure').value;
-      const P = (pressureInput !== "")
-        ? parseFloat(pressureInput)
+      const Tc = readInputNumber('temp', "20");
+      const RH = readInputNumber('rh', "50");
+      const altitude = readInputNumber('alt', "0");
+      const pressureRaw = document.getElementById('pressure').value;
+      const P = (pressureRaw !== "")
+        ? readInputNumber('pressure', String(SEA_LEVEL_PRESSURE_HPA))
         : standardPressureAtAltitude(altitude);
       const rho = computeDensity(Tc, P, RH);
       document.getElementById('rho').value = rho.toFixed(3);
@@ -573,11 +620,14 @@
         if (w.temp     !== undefined) document.getElementById('temp').value     = w.temp;
         if (w.rh       !== undefined) document.getElementById('rh').value       = w.rh;
 
-        const altitudeInput = parseFloat(document.getElementById('alt').value || "0");
+        const altitudeStored = Number(w.altitude);
+        const altitudeCurrent = readInputNumber('alt', "0");
+        const altitudeForCalc = Number.isFinite(altitudeCurrent) ? altitudeCurrent :
+                                (Number.isFinite(altitudeStored) ? altitudeStored : 0);
+
         const pressureMslStored = Number(w.pressure_msl);
         let conversionText = "";
         if (isFinite(pressureMslStored)) {
-          const altitudeForCalc = isFinite(altitudeInput) ? altitudeInput : Number(w.altitude) || 0;
           const tempForCalc = (typeof w.temp === "number") ? w.temp : parseFloat(w.temp) || 15;
           const station = setPressureFromSeaLevel(pressureMslStored, altitudeForCalc, tempForCalc);
           if (altitudeForCalc > 0 && Number.isFinite(station)){
@@ -591,7 +641,7 @@
         lastWeatherMeta = {
           temp: w.temp,
           pressure_msl: pressureMslStored,
-          altitude: Number(w.altitude)
+          altitude: altitudeForCalc
         };
         pressureManualOverride = false;
       } catch(e){}
