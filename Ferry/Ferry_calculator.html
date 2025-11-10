@@ -36,6 +36,16 @@
       padding-bottom: 4px;
     }
 
+    h2 {
+      font-size: 18px;
+      margin-top: 28px;
+      margin-bottom: 6px;
+      color: #ffffff;
+      border-bottom: 1px solid #20314d;
+      display: inline-block;
+      padding-bottom: 3px;
+    }
+
     p {
       color: #cbd4e2;
       font-size: 14px;
@@ -50,7 +60,7 @@
       font-size: 14px;
     }
 
-    input {
+    input, select {
       width: 100%;
       padding: 8px 10px;
       margin-top: 4px;
@@ -138,6 +148,28 @@
     }
 
     .bougie-icoon { font-size: 22px; }
+
+    /* Luchtschroef-blok */
+    #luchtschroef-resultaat {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #d1dcf5;
+    }
+    .tag {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 999px;
+      background: #141c2b;
+      border: 1px solid #243b63;
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+    #luchtschroef-bereken {
+      background: #009688;
+    }
+    #luchtschroef-bereken:hover {
+      background: #11aa99;
+    }
   </style>
 </head>
 <body>
@@ -177,6 +209,33 @@
     <span class="bougie-icoon">⚖️</span>
     <span id="bougie-text"><strong>Advies bougie:</strong> nog geen berekening uitgevoerd.</span>
   </div>
+
+  <!-- NIEUW BLOK: Luchtschroef fine-tuning -->
+  <h2>Luchtschroef fine-tuning Rotax Max EVO</h2>
+  <p class="extra-info">
+    Vul hier de <strong>luchtschroefstand uit de Jetting app</strong> in (slagen open).
+    Met het gedrag van de motor geeft de tool een klein correctie-advies (±0,25 slag).
+  </p>
+
+  <label for="basisLuchtschroef">Luchtschroefstand volgens Jetting app (slagen open)</label>
+  <input
+    id="basisLuchtschroef"
+    type="number"
+    step="0.01"
+    placeholder="Bijv. 2.00"
+  />
+
+  <label for="gedragMotor">Gedrag van de motor</label>
+  <select id="gedragMotor">
+    <option value="">Kies een situatie...</option>
+    <option value="hoogstationair">Blijft hoog in toeren hangen bij gas los (te arm)</option>
+    <option value="smoortgas">Smoort / verslikt zich bij gas oppakken (te rijk)</option>
+    <option value="valtuit">Valt uit bij stationair (te arm stationair)</option>
+    <option value="zachtloopt">Loopt mooi stabiel (goed)</option>
+  </select>
+
+  <button id="luchtschroef-bereken" type="button">Bereken luchtschroef advies</button>
+  <div id="luchtschroef-resultaat"></div>
 
   <script>
     const R_DROOG = 287.058, R_WATER = 461.495, RHO_REF = 1.225;
@@ -300,11 +359,65 @@
       document.getElementById('density').textContent = '';
       document.getElementById('extra').textContent = '';
       updateBougie(1.215);
+
+      // luchtschroef blok leegmaken
+      document.getElementById('basisLuchtschroef').value = '';
+      document.getElementById('gedragMotor').value = '';
+      document.getElementById('luchtschroef-resultaat').textContent = '';
+    }
+
+    function berekenLuchtschroefCorrectie() {
+      const basis = parseFloat(document.getElementById('basisLuchtschroef').value);
+      const gedrag = document.getElementById('gedragMotor').value;
+      const resultDiv = document.getElementById('luchtschroef-resultaat');
+
+      if (isNaN(basis) || !gedrag) {
+        resultDiv.innerHTML = "<span class='extra-info'>Vul eerst de basisstand én het gedrag van de motor in.</span>";
+        return;
+      }
+
+      let nieuw = basis;
+      let advies = "";
+      let label = "";
+
+      switch (gedrag) {
+        case "hoogstationair":
+          nieuw = basis - 0.25;
+          advies = "Motor is waarschijnlijk iets te arm bij gas dicht. Draai de luchtschroef iets dichter (–0,25 slag).";
+          label = "Te arm / hoog stationair";
+          break;
+        case "smoortgas":
+          nieuw = basis + 0.25;
+          advies = "Motor is waarschijnlijk iets te rijk bij oppakken van het gas. Draai de luchtschroef iets verder open (+0,25 slag).";
+          label = "Te rijk bij gas oppakken";
+          break;
+        case "valtuit":
+          nieuw = basis - 0.25;
+          advies = "Te arm rond stationair. Luchtschroef iets dichter (–0,25 slag) en eventueel stationair schroef iets indraaien.";
+          label = "Te arm / valt uit";
+          break;
+        case "zachtloopt":
+          nieuw = basis;
+          advies = "Afstelling lijkt goed. Laat de luchtschroef op deze stand staan.";
+          label = "Afstelling OK";
+          break;
+      }
+
+      resultDiv.innerHTML = `
+        <div class="tag">${label}</div><br/>
+        <strong>${advies}</strong><br/><br/>
+        <span class="extra-info">
+          Nieuwe richtwaarde luchtschroef: <strong>${nieuw.toFixed(2)} slagen open</strong><br/>
+          Oorspronkelijke waarde uit Jetting app: ${basis.toFixed(2)}<br/>
+          Verander per keer maximaal ±0,25 slag en test een paar ronden.
+        </span>
+      `;
     }
 
     document.getElementById('bereken').addEventListener('click', berekenSproeier);
     document.getElementById('gps').addEventListener('click', haalWeerViaGPS);
     document.getElementById('reset').addEventListener('click', resetVelden);
+    document.getElementById('luchtschroef-bereken').addEventListener('click', berekenLuchtschroefCorrectie);
   </script>
 </body>
 </html>
