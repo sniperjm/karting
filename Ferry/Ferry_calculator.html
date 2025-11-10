@@ -96,9 +96,7 @@
       border: 1px solid #667;
       color: #bbb;
     }
-    #reset:hover {
-      background: #222;
-    }
+    #reset:hover { background: #222; }
 
     .knoppen {
       display: flex;
@@ -309,24 +307,44 @@
       const rho = berekenDichtheid(temp, druk, vocht, hoogte);
       const jet = prismaJet(rho);
       const delta = deltaRhoPercent(rho);
+      const deltaText = (delta >= 0 ? '+' : '') + delta.toFixed(1) + '% t.o.v. 1.225';
 
       document.getElementById('resultaat').textContent = 'Aanbevolen sproeier: ' + jet;
       document.getElementById('density').textContent =
         'Luchtdichtheid: ' + rho.toFixed(3) +
-        ' kg/m³ (' + (delta >= 0 ? '+' : '') + delta.toFixed(1) + '% t.o.v. 1.225)';
+        ' kg/m³ (' + deltaText + ')';
       document.getElementById('extra').textContent = 'Controleer altijd bougiekleur en prestaties.';
 
       // Theoretische luchtschroef op basis van luchtdichtheid
       // Basis = 2.00 slagen bij delta = 0%
       // Voor elke +1% dichtere lucht → +0,05 slag
       // Voor elke -1% dunnere lucht → -0,05 slag
-      let airScrew = 2.0 + 0.05 * delta;
-      // Grenzen zetten
-      airScrew = Math.max(1.5, Math.min(2.5, airScrew));
+      const basisAir = 2.0;
+      let airScrewRaw = basisAir + 0.05 * delta;
+      // Grenzen iets strakker: 1.75 tot 2.25
+      let airScrew = Math.max(1.75, Math.min(2.25, airScrewRaw));
 
-      document.getElementById('luchtschroef-auto').textContent =
-        'Theoretische luchtschroef (op basis van luchtdichtheid): ' +
-        airScrew.toFixed(2) + ' slagen open (vuistregel).';
+      // Weer-profiel + uitleg
+      let profiel, uitleg;
+      if (delta > 3) {
+        profiel = "Koude/dichte lucht";
+        uitleg = "De lucht is duidelijk dichter dan standaard, daarom een iets rijkere basisafstelling (meer slagen open t.o.v. 2.00).";
+      } else if (delta < -3) {
+        profiel = "Warme/dunne lucht";
+        uitleg = "De lucht is duidelijk dunner dan standaard, daarom een iets armere basisafstelling (minder slagen open t.o.v. 2.00).";
+      } else {
+        profiel = "Gemiddelde omstandigheden";
+        uitleg = "De luchtdichtheid ligt dicht bij standaard, alleen een kleine correctie rond 2.00 slagen is nodig.";
+      }
+
+      document.getElementById('luchtschroef-auto').innerHTML =
+        `<span class="tag">${profiel}</span><br/>
+         Theoretische luchtschroef: <strong>${airScrew.toFixed(2)} slagen open</strong><br/>
+         <span class="extra-info">
+           Referentie: 2.00 slagen open bij 1.225 kg/m³.<br/>
+           Huidige luchtdichtheid: ${rho.toFixed(3)} kg/m³ (${deltaText})<br/>
+           ${uitleg}
+         </span>`;
 
       // Vul de basis-luchtschroef alleen in als dat veld nog leeg is
       const basisInput = document.getElementById('basisLuchtschroef');
