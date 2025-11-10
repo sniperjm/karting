@@ -204,25 +204,26 @@
   <div id="resultaat"></div>
   <div id="density" class="extra-info"></div>
   <div id="extra" class="extra-info"></div>
+  <div id="luchtschroef-auto" class="extra-info"></div>
 
   <div id="bougie" class="bougie-normaal">
     <span class="bougie-icoon">⚖️</span>
     <span id="bougie-text"><strong>Advies bougie:</strong> nog geen berekening uitgevoerd.</span>
   </div>
 
-  <!-- NIEUW BLOK: Luchtschroef fine-tuning -->
+  <!-- Luchtschroef-blok -->
   <h2>Luchtschroef fine-tuning Rotax Max EVO</h2>
   <p class="extra-info">
-    Vul hier de <strong>luchtschroefstand uit de Jetting app</strong> in (slagen open).
-    Met het gedrag van de motor geeft de tool een klein correctie-advies (±0,25 slag).
+    De tool berekent een <strong>theoretische luchtschroefstand</strong> op basis van luchtdichtheid.
+    Gebruik die als basis en pas hem eventueel aan op basis van het gedrag van de motor.
   </p>
 
-  <label for="basisLuchtschroef">Luchtschroefstand volgens Jetting app (slagen open)</label>
+  <label for="basisLuchtschroef">Basis luchtschroef (slagen open)</label>
   <input
     id="basisLuchtschroef"
     type="number"
     step="0.01"
-    placeholder="Bijv. 2.00"
+    placeholder="Wordt ingevuld na sproeier-berekening"
   />
 
   <label for="gedragMotor">Gedrag van de motor</label>
@@ -300,6 +301,7 @@
         document.getElementById('resultaat').textContent = 'Vul alle velden goed in a.u.b.';
         document.getElementById('density').textContent = '';
         document.getElementById('extra').textContent = '';
+        document.getElementById('luchtschroef-auto').textContent = '';
         updateBougie(1.215);
         return;
       }
@@ -313,6 +315,24 @@
         'Luchtdichtheid: ' + rho.toFixed(3) +
         ' kg/m³ (' + (delta >= 0 ? '+' : '') + delta.toFixed(1) + '% t.o.v. 1.225)';
       document.getElementById('extra').textContent = 'Controleer altijd bougiekleur en prestaties.';
+
+      // Theoretische luchtschroef op basis van luchtdichtheid
+      // Basis = 2.00 slagen bij delta = 0%
+      // Voor elke +1% dichtere lucht → +0,05 slag
+      // Voor elke -1% dunnere lucht → -0,05 slag
+      let airScrew = 2.0 + 0.05 * delta;
+      // Grenzen zetten
+      airScrew = Math.max(1.5, Math.min(2.5, airScrew));
+
+      document.getElementById('luchtschroef-auto').textContent =
+        'Theoretische luchtschroef (op basis van luchtdichtheid): ' +
+        airScrew.toFixed(2) + ' slagen open (vuistregel).';
+
+      // Vul de basis-luchtschroef alleen in als dat veld nog leeg is
+      const basisInput = document.getElementById('basisLuchtschroef');
+      if (!basisInput.value) {
+        basisInput.value = airScrew.toFixed(2);
+      }
 
       updateBougie(rho);
     }
@@ -358,9 +378,9 @@
       document.getElementById('resultaat').textContent = '';
       document.getElementById('density').textContent = '';
       document.getElementById('extra').textContent = '';
+      document.getElementById('luchtschroef-auto').textContent = '';
       updateBougie(1.215);
 
-      // luchtschroef blok leegmaken
       document.getElementById('basisLuchtschroef').value = '';
       document.getElementById('gedragMotor').value = '';
       document.getElementById('luchtschroef-resultaat').textContent = '';
@@ -408,7 +428,7 @@
         <strong>${advies}</strong><br/><br/>
         <span class="extra-info">
           Nieuwe richtwaarde luchtschroef: <strong>${nieuw.toFixed(2)} slagen open</strong><br/>
-          Oorspronkelijke waarde uit Jetting app: ${basis.toFixed(2)}<br/>
+          Oorspronkelijke basis: ${basis.toFixed(2)}<br/>
           Verander per keer maximaal ±0,25 slag en test een paar ronden.
         </span>
       `;
