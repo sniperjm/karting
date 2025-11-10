@@ -1,175 +1,43 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8" />
-  <title>Rotax EVO Luchtschroef & Stationair Helper</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rotax EVO Luchtschroef Correctie</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      max-width: 480px;
-      margin: 0 auto;
-      padding: 16px;
-      box-sizing: border-box;
       background: #111;
       color: #f5f5f5;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 20px;
+      box-sizing: border-box;
     }
-
     h1 {
-      font-size: 1.4rem;
       text-align: center;
-      margin-bottom: 12px;
+      font-size: 1.4rem;
+      margin-bottom: 10px;
     }
-
     .card {
-      background: #1b1b1b;
+      background: #1c1c1c;
       border-radius: 10px;
-      padding: 14px;
+      padding: 16px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.4);
       margin-bottom: 16px;
     }
-
     label {
       display: block;
       margin-bottom: 6px;
+      font-weight: bold;
       font-size: 0.9rem;
     }
-
-    input[type="number"] {
+    input, select {
       width: 100%;
-      box-sizing: border-box;
       padding: 8px;
       border-radius: 6px;
-      border: 1px solid #444;
+      border: 1px solid #333;
       background: #111;
-      color: #f5f5f5;
-      font-size: 1rem;
-      margin-bottom: 10px;
-    }
-
-    button {
-      width: 100%;
-      padding: 10px;
-      border-radius: 6px;
-      border: none;
-      font-size: 1rem;
-      cursor: pointer;
-      background: #2563eb;
-      color: white;
-      font-weight: 600;
-      margin-top: 4px;
-    }
-
-    button:active {
-      transform: scale(0.98);
-    }
-
-    .result {
-      margin-top: 10px;
-      padding-top: 8px;
-      border-top: 1px solid #333;
+      color: #fff;
+      margin-bottom: 12px;
       font-size: 0.95rem;
-      line-height: 1.4;
-    }
-
-    .result strong {
-      display: block;
-      margin-top: 4px;
-    }
-
-    .note {
-      font-size: 0.8rem;
-      color: #bbbbbb;
-    }
-
-    .tag {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      margin-top: 4px;
-      border: 1px solid #444;
-    }
-  </style>
-</head>
-<body>
-  <h1>Rotax Max EVO<br>Luchtschroef & Stationair</h1>
-
-  <div class="card">
-    <p class="note">
-      Voor de <strong>nieuwe Rotax Max EVO</strong> met Dell'Orto VHSB 34.
-      Gebruik de <strong>Rotax Jetting / Jetting Max EVO app</strong> voor de
-      hoofdsproeier. Deze tool helpt alleen met de
-      <strong>luchtschroef</strong> en <strong>stationair schroef</strong>
-      op basis van de temperatuur.
-      <br><br>
-      <strong>Fabrieksbasis Rotax EVO:</strong> luchtschroef
-      <strong>1½ slag open</strong> vanaf helemaal dicht.
-    </p>
-  </div>
-
-  <div class="card">
-    <label for="temp">Temperatuur op het circuit (°C)</label>
-    <input type="number" id="temp" placeholder="Bijv. 12" />
-
-    <button onclick="bereken()">Advies berekenen</button>
-
-    <div id="result" class="result"></div>
-  </div>
-
-  <div class="card">
-    <strong>Snelle check tijdens rijden</strong>
-    <ul class="note">
-      <li>Bij gas dicht → toerental blijft hoog hangen = vaak <em>te arm</em> → luchtschroef iets <strong>dichter</strong>.</li>
-      <li>Bij gas geven → motor verslikt / smoort = vaak <em>te rijk</em> → luchtschroef iets <strong>verder open</strong>.</li>
-      <li>Blok valt snel uit bij stationair = stationair schroef iets <strong>indraaien</strong>.</li>
-    </ul>
-  </div>
-
-  <script>
-    function bereken() {
-      const tempInput = document.getElementById("temp");
-      const resultDiv = document.getElementById("result");
-      const t = parseFloat(tempInput.value);
-
-      if (isNaN(t)) {
-        resultDiv.innerHTML = "<span class='note'>Vul eerst een geldige temperatuur in.</span>";
-        return;
-      }
-
-      // Rotax Max EVO fabriek: 1.5 slagen open, kleine correcties op temperatuur
-      let luchtschroef = 1.5;
-      let weerType = "";
-      let uitleg = "";
-
-      if (t < 10) {
-        luchtschroef = 1.75;
-        weerType = "Koud";
-        uitleg = "Koude, dichte lucht. Iets rijkere afstelling dan standaard → luchtschroef iets verder open dan 1½ slag.";
-      } else if (t >= 10 && t <= 25) {
-        luchtschroef = 1.5;
-        weerType = "Normaal";
-        uitleg = "Gemiddelde omstandigheden. Dit komt overeen met de fabrieksinstelling van Rotax EVO (1½ slag open).";
-      } else {
-        luchtschroef = 1.25;
-        weerType = "Warm";
-        uitleg = "Warme, dunnere lucht. Iets armere afstelling nodig → luchtschroef iets dichter dan 1½ slag.";
-      }
-
-      const stationairUitleg =
-        "Draai de stationair schroef zo dat het stationair toerental rond de 2000–2200 rpm ligt. " +
-        "Als hij te snel blijft hangen → iets uitdraaien; als hij wil uitvallen → iets indraaien.";
-
-      resultDiv.innerHTML = `
-        <span class="tag">${weerType}</span>
-        <strong>Advies luchtschroef (Rotax EVO):</strong>
-        Ongeveer <strong>${luchtschroef.toFixed(2)} slagen open</strong> vanaf helemaal dicht.<br/>
-        <br/>
-        <strong>Advies stationair schroef:</strong><br/>
-        ${stationairUitleg}<br/><br/>
-        <span class="note">${uitleg}</span>
-      `;
-    }
-  </script>
-</body>
-</html>
