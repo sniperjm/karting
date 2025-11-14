@@ -3,7 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <title>Kart Setup Helper – CKR OK</title>
+
+  <!-- PWA / MOBILE -->
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#1d4ed8" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icon-512.png" />
+
   <style>
     :root {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -743,6 +749,15 @@
   </div>
 
   <script>
+    // Service worker registreren voor PWA
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("./service-worker.js")
+          .catch(err => console.error("SW registratie fout:", err));
+      });
+    }
+
     // Data voor klachten → adviezen (generiek / CKR)
     const setupData = {
       oversteer_entry: {
@@ -848,4 +863,141 @@
         small: [
           "Neem 1 tik caster weg zodat de kart rustiger wordt rond de middenstand.",
           "Controleer of je voorspoor niet té breed staat; maak het 5–10 mm smaller als het extreem is.",
-          "Controleer uitlijning (toe-in/out
+          "Controleer uitlijning (toe-in/out); een beetje toe-in kan de kart rechtuit stabieler maken."
+        ],
+        big: [
+          "Gebruik een iets zachtere voor torsiestang (of haal hem weg) om de voorkant minder ‘direct’ te maken.",
+          "Stoel heel licht naar achter verplaatsen kan helpen als je veel gewicht op de neus hebt.",
+          "Bandendruk voor een fractie omlaag om de kart minder ‘springerig’ te maken op kerbs."
+        ],
+        notes: "Rechtuit nervositeit is vaak combinatie van te agressieve voorzijde (caster/spoor) en bump-steer. Kleine veranderingen maken al veel verschil."
+      },
+      braking_instability: {
+        title: "Onstabiel bij remmen (achter breekt uit)",
+        small: [
+          "Zorg dat je rechtuit remt; als je al instuurt tijdens remmen wordt hij snel zenuwachtig.",
+          "Maak de achterspoor 5–10 mm smaller voor meer stabiliteit onder remmen.",
+          "Verlaag bandendruk achter iets als de banden blokkeren en gaan glijden."
+        ],
+        big: [
+          "Ga naar een zachtere achteras als de achterkant heel stijf is en direct blokkeert.",
+          "Zet de achterkant 1 klik hoger in rijhoogte voor meer grip achter bij remmen.",
+          "Verplaats de stoel een paar mm naar achter voor iets meer gewicht op de achteras tijdens remmen."
+        ],
+        notes: "Rem-onstabiliteit los je meestal op via extra achtergrip en een iets rustiger voorzijde. Vergeet rijstijl niet: progressief remmen helpt enorm."
+      },
+      too_much_lift: {
+        title: "Kart tilt bijna op 2 wielen / extreem veel lift",
+        small: [
+          "Neem 1–2 tikken caster weg om minder agressieve jacking te krijgen.",
+          "Maak de achterspoor 5–10 mm breder zodat de kart stabieler is bij hoge laterale krachten.",
+          "Verlaag bandendruk iets zodat de banden minder ‘happen’."
+        ],
+        big: [
+          "Gebruik een hardere as om de flex te beperken en de kart lager ‘in’ het rubber te houden.",
+          "Zet rijhoogte voor én achter 1 klik lager om het zwaartepunt omlaag te brengen.",
+          "Stoel iets lager plaatsen en eventueel een achter torsiestang toevoegen voor meer stabiliteit."
+        ],
+        notes: "Als de kart bijna op 2 wielen gaat, heb je veel te veel gewichtsoverdracht. Minder caster, lager rijden en bredere achterspoor helpen het meest."
+      },
+      rain: {
+        title: "Regen / full wet setup",
+        small: [
+          "Verhoog bandendruk t.o.v. droog om de banden sneller warm te krijgen.",
+          "Maak de achterspoor smaller voor meer tractie (richting CKR rain-waarde uit de tabel).",
+          "Voeg 1–2 tikken caster toe voor scherper insturen en meer lift."
+        ],
+        big: [
+          "Zet rijhoogte voor én achter zo hoog mogelijk voor extra mechanische grip.",
+          "Gebruik een zachtere as zodat de achterkant makkelijker kan werken en grip opbouwt.",
+          "Stoel hoger zetten voor een hoger zwaartepunt en meer gewichtsverplaatsing."
+        ],
+        notes: "Rijlijn in de regen: meer naast het rubber, vooral op het schone asfalt rijden, rustig met stuur en gas. Setup helpt, maar rijstijl is mega belangrijk."
+      }
+    };
+
+    function getAdvice(symptom, condition) {
+      const base = setupData[symptom];
+      if (!base) return null;
+
+      const extraNotes = [];
+
+      if (condition === "dry_low" && symptom !== "rain") {
+        extraNotes.push(
+          "Baanconditie: droog met weinig grip → durf iets agressiever met caster/rijhoogte en een zachtere as te gaan."
+        );
+      }
+
+      if (condition === "dry_high" && symptom !== "rain") {
+        extraNotes.push(
+          "Baanconditie: droog met hoge grip → let op hoppen. Hardere as, lagere rijhoogte en bredere achterspoor helpen vaak."
+        );
+      }
+
+      if (condition === "rain_mixed") {
+        extraNotes.push(
+          "Baanconditie: natte plekken / opdrogende baan → vaak iets tussen droog en full wet in: rijhoogte niet maximaal hoog, bandendruk iets boven droog maar onder full wet, achterspoor niet maximaal smal."
+        );
+      }
+
+      if (condition === "rain_full" && symptom !== "rain") {
+        extraNotes.push(
+          "Je hebt full-wet omstandigheden opgegeven. Kijk ook bij de aparte ‘Regen / full wet’ optie voor een complete regensetup."
+        );
+      }
+
+      return {
+        ...base,
+        extraNotes
+      };
+    }
+
+    function renderAdvice(advice) {
+      const output = document.getElementById("output");
+      if (!advice) {
+        output.innerHTML = `
+          <div class="card">
+            <h2>Onbekende combinatie<span>Let op</span></h2>
+            <small>Ik heb voor deze combinatie nog geen regels. Kies een andere klacht of pas de data in het script aan.</small>
+            <ul>
+              <li>Controleer eerst je baseline setup (zoals in de CKR tabel).</li>
+              <li>Verander maar één ding tegelijk en hou tijden bij.</li>
+            </ul>
+          </div>
+        `;
+        return;
+      }
+
+      const smallList = advice.small.map(item => `<li>${item}</li>`).join("");
+      const bigList = advice.big.map(item => `<li>${item}</li>`).join("");
+
+      const extraNotesHtml = advice.extraNotes && advice.extraNotes.length
+        ? `<div class="note">${advice.extraNotes.join("<br>")}</div>`
+        : "";
+
+      output.innerHTML = `
+        <div class="card">
+          <h2>${advice.title}<span>Voorstel</span></h2>
+          <small>Eerst kleine stappen, dan grotere wijzigingen. Altijd checken met de stopwatch.</small>
+
+          <strong style="font-size:0.82rem;">Eerst proberen (kleine aanpassingen)</strong>
+          <ul>${smallList}</ul>
+
+          <strong style="font-size:0.82rem; display:block; margin-top:6px;">Grotere veranderingen (stap 2)</strong>
+          <ul>${bigList}</ul>
+
+          <div class="note">${advice.notes}</div>
+          ${extraNotesHtml}
+        </div>
+      `;
+    }
+
+    document.getElementById("showAdvice").addEventListener("click", () => {
+      const symptom = document.getElementById("symptom").value;
+      const condition = document.getElementById("condition").value;
+      const advice = getAdvice(symptom, condition);
+      renderAdvice(advice);
+    });
+  </script>
+</body>
+</html>
