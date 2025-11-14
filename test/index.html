@@ -1,5 +1,1003 @@
 <!DOCTYPE html>
 <html lang="nl">
-<head><meta charset="UTF-8"><title>CKR</title></head>
-<body>INDEX PLACEHOLDER – volledige code wordt hier geplaatst in volgende stap.</body>
+<head>
+  <meta charset="UTF-8" />
+  <title>Kart Setup Helper – CKR OK</title>
+
+  <!-- PWA / MOBILE -->
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#1d4ed8" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icon-512.png" />
+
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+      color: #e5e7eb;
+      background: #020617;
+    }
+
+    body {
+      margin: 0;
+      padding: 16px;
+      background: radial-gradient(circle at top, #1e293b 0, #020617 55%);
+      color: #e5e7eb;
+    }
+
+    .app {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: rgba(15,23,42,0.92);
+      border-radius: 18px;
+      padding: 20px 18px 22px;
+      box-shadow: 0 20px 45px rgba(0,0,0,0.6);
+      border: 1px solid rgba(148,163,184,0.35);
+      backdrop-filter: blur(12px);
+      position: relative; /* nodig voor logo rechtsboven */
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    h1 span.badge {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(59,130,246,0.16);   /* blauw */
+      color: #bfdbfe;
+      border: 1px solid rgba(59,130,246,0.5);
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.4fr);
+      gap: 18px;
+      margin-top: 16px;
+    }
+
+    @media (max-width: 950px) {
+      .layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #9ca3af;
+    }
+
+    select, button, textarea, input {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid rgba(148,163,184,0.6);
+      background: rgba(15,23,42,0.96);
+      color: #e5e7eb;
+      padding: 8px 10px;
+      font-size: 0.9rem;
+      box-sizing: border-box;
+    }
+
+    select:focus, button:focus, textarea:focus, input:focus {
+      outline: 2px solid #3b82f6; /* blauw */
+      outline-offset: 1px;
+      border-color: #3b82f6;
+    }
+
+    button {
+      margin-top: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: linear-gradient(135deg, #3b82f6, #ef4444); /* blauw → rood */
+      border: none;
+      color: #0b1120;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.8rem;
+      padding: 9px 12px;
+      box-shadow: 0 10px 25px rgba(37,99,235,0.35);
+    }
+
+    button:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+      box-shadow: 0 14px 30px rgba(37,99,235,0.45);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0 8px 18px rgba(37,99,235,0.3);
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .pill {
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.5);
+      background: rgba(15,23,42,0.95);
+      color: #9ca3af;
+    }
+
+    .pill strong {
+      color: #e5e7eb;
+    }
+
+    .card {
+      background: radial-gradient(circle at top left,
+        rgba(59,130,246,0.12) 0,
+        rgba(15,23,42,0.98) 55%);
+      border-radius: 14px;
+      padding: 12px 12px 13px;
+      border: 1px solid rgba(148,163,184,0.55);
+    }
+
+    .card h2 {
+      font-size: 0.95rem;
+      margin: 0 0 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .card h2 span {
+      font-size: 0.75rem;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.96);
+      border: 1px solid rgba(148,163,184,0.55);
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .card small {
+      display: block;
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-bottom: 6px;
+    }
+
+    .card ul {
+      margin: 0 0 4px 1.1rem;
+      padding: 0;
+      font-size: 0.82rem;
+    }
+
+    .card li + li {
+      margin-top: 2px;
+    }
+
+    .note {
+      font-size: 0.78rem;
+      color: #9ca3af;
+      margin-top: 6px;
+    }
+
+    .hint {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-top: 8px;
+    }
+
+    .footer {
+      margin-top: 14px;
+      font-size: 0.72rem;
+      color: #6b7280;
+      text-align: right;
+    }
+
+    .footer span.brand {
+      color: #9ca3af;
+      font-weight: 500;
+    }
+
+    .two-cols {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    @media (max-width: 700px) {
+      .two-cols {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .header {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    /* LOGO rechtsboven */
+    .rtc-logo {
+      position: absolute;
+      top: 16px;
+      right: 18px;
+      height: 70px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    @media (max-width: 600px) {
+      .rtc-logo {
+        height: 60px;
+        top: 14px;
+        right: 14px;
+      }
+    }
+
+    /* Kleine kart voor bandendruk */
+    .kart-pressure-wrapper {
+      margin-top: 8px;
+    }
+
+    .kart-pressure-title {
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #9ca3af;
+      margin-bottom: 4px;
+    }
+
+    .kart-pressure-card {
+      border-radius: 12px;
+      border: 1px solid rgba(148,163,184,0.6);
+      background: rgba(15,23,42,0.96);
+      padding: 8px 10px 10px;
+      font-size: 0.78rem;
+    }
+
+    .kart-pressure-grid {
+      display: grid;
+      grid-template-areas:
+        "fl chassis fr"
+        "rl chassis rr";
+      grid-template-columns: 1fr auto 1fr;
+      grid-auto-rows: auto;
+      gap: 6px 10px;
+      align-items: center;
+      justify-items: center;
+    }
+
+    .wheel-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      min-width: 80px;
+    }
+
+    .wheel-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9ca3af;
+    }
+
+    .wheel-box input {
+      width: 72px;
+      text-align: center;
+      font-size: 0.8rem;
+      padding: 4px 6px;
+    }
+
+    .wheel-fl { grid-area: fl; }
+    .wheel-fr { grid-area: fr; }
+    .wheel-rl { grid-area: rl; }
+    .wheel-rr { grid-area: rr; }
+
+    .kart-chassis {
+      grid-area: chassis;
+      width: 82px;
+      height: 60px;
+      border-radius: 12px;
+      border: 2px solid rgba(59,130,246,0.9); /* blauw kader */
+      position: relative;
+      box-shadow: 0 0 10px rgba(59,130,246,0.25);
+    }
+
+    .kart-chassis::before,
+    .kart-chassis::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 34px;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(239,68,68,0.9); /* rood – assen */
+    }
+
+    .kart-chassis::before {
+      top: 10px;   /* stuur-as */
+    }
+
+    .kart-chassis::after {
+      bottom: 10px; /* achteras */
+    }
+
+    @media (max-width: 480px) {
+      .kart-pressure-grid {
+        grid-template-columns: 1fr auto 1fr;
+      }
+      .wheel-box {
+        min-width: 0;
+      }
+      .wheel-box input {
+        width: 64px;
+      }
+      .kart-chassis {
+        width: 70px;
+        height: 50px;
+      }
+    }
+
+    /* CKR baseline tabel */
+    .baseline-table-wrapper {
+      margin-top: 6px;
+      overflow-x: auto;
+    }
+
+    .baseline-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+      min-width: 520px;
+    }
+
+    .baseline-table th,
+    .baseline-table td {
+      border: 1px solid rgba(148,163,184,0.5);
+      padding: 4px 6px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .baseline-table th {
+      background: rgba(15,23,42,0.96);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: 0.72rem;
+    }
+
+    .baseline-table thead th:first-child {
+      text-align: left;
+    }
+
+    .baseline-table tbody td:first-child {
+      text-align: left;
+      font-weight: 500;
+      color: #e5e7eb;
+    }
+
+    .baseline-table tbody tr:nth-child(odd) {
+      background: rgba(15,23,42,0.9);
+    }
+
+    .baseline-table tbody tr:nth-child(even) {
+      background: rgba(15,23,42,0.75);
+    }
+
+    .baseline-table caption {
+      caption-side: bottom;
+      padding-top: 4px;
+      font-size: 0.7rem;
+      color: #9ca3af;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- LOGO RECHTSBOVEN -->
+    <img
+      src="owendvh-racing-logo.png"
+      alt="Owendvh Racing"
+      class="rtc-logo"
+    />
+
+    <div class="header">
+      <h1>
+        Kart Setup Helper
+        <span class="badge">CKR OK chassis</span>
+        <span class="badge">v0.1 – CKR sheet</span>
+      </h1>
+      <div class="subtitle">
+        Kies wat je kart doet in de bocht en de baanconditie. De tool geeft
+        een paar <strong>eerst-proberen</strong> stappen en daarna grotere veranderingen.
+        Zie het als richtlijn – uiteindelijk beslist de stopwatch. ⏱️
+      </div>
+    </div>
+
+    <div class="layout">
+      <!-- LINKERKANT: INPUT -->
+      <div class="grid">
+        <div>
+          <label for="symptom">1. Klacht / gevoel van de kart</label>
+          <select id="symptom">
+            <option value="">– Kies een symptoom –</option>
+            <option value="oversteer_entry">Overstuur vooral bij ingaan bocht</option>
+            <option value="oversteer_exit">Overstuur vooral bij uitkomen bocht</option>
+            <option value="understeer_entry">Onderstuur bij insturen (wil niet de bocht in)</option>
+            <option value="understeer_exit">Onderstuur midden/uit de bocht (blijft wijd lopen)</option>
+            <option value="hopping">Kart hopt / stuitert (meestal achterkant)</option>
+            <option value="low_grip">Te weinig grip overal (glij-ijsbaan)</option>
+            <option value="high_grip">Te veel grip / kart “plakt” en voelt zwaar</option>
+            <option value="nervous_straight">Kart nerveus rechtuit / bij snelle richtingswissels</option>
+            <option value="braking_instability">Onstabiel bij remmen (achter breekt uit)</option>
+            <option value="too_much_lift">Kart tilt bijna op 2 wielen / extreem veel lift</option>
+            <option value="rain">Regen / full wet setup</option>
+          </select>
+
+          <label for="condition" style="margin-top:10px;">2. Baanconditie</label>
+          <select id="condition">
+            <option value="dry_normal">Droog – normale grip</option>
+            <option value="dry_low">Droog – weinig grip / groene baan</option>
+            <option value="dry_high">Droog – veel rubber / hoge grip</option>
+            <option value="rain_mixed">Natte plekken / opdrogende baan (intermediate)</option>
+            <option value="rain_full">Regen – echt nat / full wet</option>
+          </select>
+
+          <button id="showAdvice">
+            Toon advies
+            <span>⚙️</span>
+          </button>
+
+          <div class="hint">
+            Tip: verander altijd maar <strong>één of twee dingen tegelijk</strong> en noteer wat je doet.
+            Start liefst vanaf de <strong>CKR standaard setup</strong> (zie tabel rechts onderin).
+          </div>
+        </div>
+
+        <!-- HUIDIGE SETUP / NOTITIES -->
+        <div>
+          <div class="card">
+            <h2>
+              Huidige setup & notities
+              <span>Logboek</span>
+            </h2>
+            <small>Gebruik dit blok om je huidige baseline te noteren (banden, spoor, as, caster/camber, etc.). Wordt niet automatisch gebruikt in de berekening, maar is handig als logboek.</small>
+
+            <div class="two-cols">
+              <div>
+                <label for="tyres">Banden</label>
+                <input id="tyres" placeholder="Bijv. Maxxis Super Sport, Mojo D5 ..." />
+              </div>
+              <div>
+                <label for="axle">As-type</label>
+                <select id="axle">
+                  <option value="">– Kies –</option>
+                  <option value="soft">Zacht</option>
+                  <option value="medium">Medium</option>
+                  <option value="hard">Hard</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- KLEINE KART MET BANDENDRUK PER BAND -->
+            <div class="kart-pressure-wrapper">
+              <div class="kart-pressure-title">Bandendruk per band (bar)</div>
+              <div class="kart-pressure-card">
+                <div class="kart-pressure-grid">
+                  <div class="wheel-box wheel-fl">
+                    <span class="wheel-label">Voor links</span>
+                    <input id="pressure_fl" placeholder="0.88" />
+                  </div>
+                  <div class="wheel-box wheel-fr">
+                    <span class="wheel-label">Voor rechts</span>
+                    <input id="pressure_fr" placeholder="0.90" />
+                  </div>
+                  <div class="wheel-box wheel-rl">
+                    <span class="wheel-label">Achter links</span>
+                    <input id="pressure_rl" placeholder="0.94" />
+                  </div>
+                  <div class="wheel-box wheel-rr">
+                    <span class="wheel-label">Achter rechts</span>
+                    <input id="pressure_rr" placeholder="0.96" />
+                  </div>
+
+                  <div class="kart-chassis" aria-hidden="true"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- SPOOR -->
+            <div class="two-cols" style="margin-top:8px;">
+              <div>
+                <label for="track_front">Voorspoor (mm totaal)</label>
+                <input id="track_front" placeholder="Bijv. 1210 – 1220" />
+              </div>
+              <div>
+                <label for="track_rear">Achterspoor (mm totaal)</label>
+                <input id="track_rear" placeholder="Bijv. 1400 droog / 1360 regen" />
+              </div>
+            </div>
+
+            <!-- CASTER / CAMBER -->
+            <div class="two-cols" style="margin-top:6px;">
+              <div>
+                <label for="caster">Caster instelling</label>
+                <input id="caster" placeholder="Bijv. neutral / +1 p" />
+              </div>
+              <div>
+                <label for="camber">Camber instelling</label>
+                <input id="camber" placeholder="Bijv. -2 / -4" />
+              </div>
+            </div>
+
+            <label for="notes" style="margin-top:8px;">Notities / rondetijden</label>
+            <textarea id="notes" rows="3" placeholder="Schrijf hier wat je verandert en wat de rondetijden waren..."></textarea>
+            <div class="note">
+              Wil je dit later bewaren? Print de pagina naar PDF of maak een screenshot nadat je alles hebt ingevuld.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECHTERKANT: OUTPUT + CKR TABEL -->
+      <div>
+        <div class="pill-row">
+          <div class="pill"><strong>Front</strong> – spoor, caster, camber, rijhoogte</div>
+          <div class="pill"><strong>Rear</strong> – spoor, as, rijhoogte, hubs</div>
+          <div class="pill"><strong>Seat</strong> – positie, hoogte, seat stays</div>
+          <div class="pill"><strong>Banden</strong> – type & druk</div>
+        </div>
+
+        <div id="output">
+          <div class="card">
+            <h2>
+              Nog geen selectie
+              <span>Handleiding</span>
+            </h2>
+            <small>Kies links een klacht en de baanconditie om een setup-voorstel te zien.</small>
+            <ul>
+              <li>Begin altijd vanaf een <strong>CKR baseline setup</strong> zoals in de tabel hieronder.</li>
+              <li>Pas kleine dingen aan (bijv. 5–10 mm spoor, 1 “klik” caster) en voel het verschil.</li>
+              <li>Laat de stopwatch beslissen of het echt sneller is.</li>
+            </ul>
+            <div class="note">
+              Deze tool is een snelle referentie. De exacte mm-waardes (spoor, stoelpositie) vul je in aan de linkerkant of in je eigen setup-sheet.
+            </div>
+          </div>
+        </div>
+
+        <!-- CKR BASELINE TABEL -->
+        <div style="margin-top:10px;">
+          <div class="card">
+            <h2>
+              CKR standaard setup
+              <span>OK – uit CKR sheet</span>
+            </h2>
+            <small>Korte referentie voor een CKR OK chassis. Kolommen zijn Standard / High Grip / Low Grip / Rain.</small>
+
+            <div class="baseline-table-wrapper">
+              <table class="baseline-table">
+                <thead>
+                  <tr>
+                    <th>Parameter</th>
+                    <th>Standaard</th>
+                    <th>High grip</th>
+                    <th>Low grip</th>
+                    <th>Rain</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Front width (mm)</td>
+                    <td>1210</td>
+                    <td>1220</td>
+                    <td>1210,5</td>
+                    <td>1260</td>
+                  </tr>
+                  <tr>
+                    <td>Front hub</td>
+                    <td>st</td>
+                    <td>st</td>
+                    <td>st</td>
+                    <td>long</td>
+                  </tr>
+                  <tr>
+                    <td>Front height</td>
+                    <td>low</td>
+                    <td>low</td>
+                    <td>high</td>
+                    <td>high</td>
+                  </tr>
+                  <tr>
+                    <td>Caster sniper</td>
+                    <td>neutral</td>
+                    <td>Inc. 1 p</td>
+                    <td>Inc. 2 p</td>
+                    <td>Inc. 1 p</td>
+                  </tr>
+                  <tr>
+                    <td>Caster low eccentric</td>
+                    <td>neutral</td>
+                    <td>Inc. full</td>
+                    <td>neutral</td>
+                    <td>Inc. full</td>
+                  </tr>
+                  <tr>
+                    <td>Camber</td>
+                    <td>-2</td>
+                    <td>-4 / -6</td>
+                    <td>-2</td>
+                    <td>-2</td>
+                  </tr>
+                  <tr>
+                    <td>Akerman</td>
+                    <td>st</td>
+                    <td>st</td>
+                    <td>st</td>
+                    <td>st</td>
+                  </tr>
+                  <tr>
+                    <td>Rear width (mm)</td>
+                    <td>1400</td>
+                    <td>1400</td>
+                    <td>1380,5 / 1390</td>
+                    <td>1360</td>
+                  </tr>
+                  <tr>
+                    <td>Axle length (mm)</td>
+                    <td>1020</td>
+                    <td>1000</td>
+                    <td>1020</td>
+                    <td>1020</td>
+                  </tr>
+                  <tr>
+                    <td>Rear hub</td>
+                    <td>st</td>
+                    <td>st</td>
+                    <td>st</td>
+                    <td>global</td>
+                  </tr>
+                  <tr>
+                    <td>Axle type</td>
+                    <td>h</td>
+                    <td>h</td>
+                    <td>m / c4</td>
+                    <td>m / c4</td>
+                  </tr>
+                  <tr>
+                    <td>Rear height</td>
+                    <td>mid</td>
+                    <td>high</td>
+                    <td>low</td>
+                    <td>low</td>
+                  </tr>
+                  <tr>
+                    <td>Wheels</td>
+                    <td>mg</td>
+                    <td>mg</td>
+                    <td>mg</td>
+                    <td>Alu</td>
+                  </tr>
+                  <tr>
+                    <td>Wheel size</td>
+                    <td>130 / 210</td>
+                    <td>130 / 210</td>
+                    <td>130 / 210</td>
+                    <td>130 / 180</td>
+                  </tr>
+                  <tr>
+                    <td>Front stab bar</td>
+                    <td>Si Teflon</td>
+                    <td>Si Teflon</td>
+                    <td>Si steel</td>
+                    <td>Si Teflon</td>
+                  </tr>
+                  <tr>
+                    <td>Rear bumpor</td>
+                    <td>loose</td>
+                    <td>loose</td>
+                    <td>loose</td>
+                    <td>loose</td>
+                  </tr>
+                </tbody>
+                <caption>
+                  Tip: gebruik “Standaard” als basis bij normale grip, en switch naar de andere kolommen als je baan naar high grip, low grip of regen gaat.
+                </caption>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer">
+          <span class="brand">Owendvh Racing – Kart Setup Helper (CKR)</span> • v0.1
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Service worker registreren voor PWA
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("./service-worker.js")
+          .catch(err => console.error("SW registratie fout:", err));
+      });
+    }
+
+    // Data voor klachten → adviezen (generiek / CKR)
+    const setupData = {
+      oversteer_entry: {
+        title: "Overstuur vooral bij ingaan bocht",
+        small: [
+          "Maak de vooras iets smaller (voor spoor 5–10 mm per kant naar binnen) als de kart té agressief instuurt.",
+          "Neem 1 tik caster weg (minder caster) om de kart rustiger te maken bij insturen.",
+          "Controleer of je niet te veel remdruk abrupt loslaat – rijstijl kan ook snap-overstuur geven."
+        ],
+        big: [
+          "Zet de voorkant 1 klik lager in rijhoogte om de voorgrip iets te verminderen.",
+          "Verplaats de stoel een paar mm naar achter als je heel veel gewicht op de neus hebt.",
+          "Als je juist weinig grip achter hebt, maak de achterspoor 5–10 mm smaller en/of gebruik een zachtere as."
+        ],
+        notes: "Instuur-overstuur komt vaak door te agressieve voorzijde (veel caster, veel voor spoor) in combinatie met weinig steun van de achterkant."
+      },
+      oversteer_exit: {
+        title: "Overstuur vooral bij uitkomen bocht",
+        small: [
+          "Maak de achterspoor 5–10 mm smaller voor meer tractie bij uitaccelereren.",
+          "Verlaag de bandendruk achter 0,05–0,10 bar als de banden te heet worden en gaan glijden.",
+          "Neem 1 tik caster weg als de kart heel veel lift geeft en daardoor de achterkant “los” maakt."
+        ],
+        big: [
+          "Monteer een zachtere as als de achterkant te stijf is en moeilijk tractie maakt.",
+          "Zet de achterkant 1 klik hoger in rijhoogte voor meer grip achter (tenzij je last hebt van hoppen – kijk dan bij ‘Kart hopt / stuitert’).",
+          "Voeg eventueel een extra seat stay toe aan de motorzijde voor meer belasting op de achteras."
+        ],
+        notes: "Laat-bocht overstuur kan ook komen door te weinig voorgrip bij instuur. Als de kart de bocht al slecht in wil, eerst onderstuur oplossen."
+      },
+      understeer_entry: {
+        title: "Onderstuur bij insturen (wil niet de bocht in)",
+        small: [
+          "Maak de voorspoor 5–10 mm per kant breder voor meer bite van de voorkant.",
+          "Voeg 1 tik caster toe voor meer binnenste achterwiel-lift en scherpere turn-in.",
+          "Controleer of je niet te hard en te lang remt in de bocht; dat kan de neus ook naar buiten duwen."
+        ],
+        big: [
+          "Zet de voorkant 1 klik hoger in rijhoogte voor extra voorgrip.",
+          "Verplaats de stoel een beetje naar voren/hoger zodat er meer gewicht op de vooras komt.",
+          "Plaats (of verdraai naar stijvere stand) de voor torsiestang om de voorkant stijver en directer te maken."
+        ],
+        notes: "Instuur-onderstuur los je meestal eerst op met voor spoor en caster. Grotere veranderingen zijn pas stap 2."
+      },
+      understeer_exit: {
+        title: "Onderstuur midden/uit de bocht (blijft wijd lopen)",
+        small: [
+          "Controleer eerst instuur: als de kart al lui de bocht in gaat, behandel het als instuur-onderstuur.",
+          "Verlaag bandendruk vóór iets als de voorbanden oververhit raken en grip verliezen.",
+          "Maak de achterspoor 5–10 mm breder om de achterkant iets vrijer te maken, zodat de neus makkelijker naar binnen kan."
+        ],
+        big: [
+          "Neem 1 tik caster toe als de kart heel vlak door de bocht rolt en weinig lift geeft.",
+          "Zet de achterkant 1 klik lager in rijhoogte om binding wat te verminderen.",
+          "Stoel iets lager zetten kan helpen als de kart in het midden van de bocht te veel grip heeft en daardoor naar buiten drukt."
+        ],
+        notes: "Midden/exit-onderstuur is vaak balans tussen te veel achtergrip (kart bindt) en te weinig voorgrip. Speel met achterspoor + caster."
+      },
+      hopping: {
+        title: "Kart hopt / stuitert (meestal achterkant)",
+        small: [
+          "Maak de achterspoor 5–10 mm breder om de kart vrijer te maken.",
+          "Neem 1 tik caster weg (minder caster) om minder agressieve lift te krijgen.",
+          "Verlaag bandendruk iets zodat de band minder springerig wordt."
+        ],
+        big: [
+          "Ga naar een hardere as om de frame-flex beter te laten werken op hoge grip.",
+          "Zet de achterkant 1 klik lager in rijhoogte voor minder jacking.",
+          "Verwijder achter torsiestang en/of extra seat stays zodat de achterkant meer kan werken zonder te blokkeren."
+        ],
+        notes: "Hoppen = meestal te veel grip / te veel lift. In plaats van ‘minder grip’ moet je denken: ‘minder binding, soepeler flex’."
+      },
+      low_grip: {
+        title: "Te weinig grip overal (low grip / groene baan)",
+        small: [
+          "Verhoog bandendruk iets zodat de banden sneller op temperatuur komen.",
+          "Maak de achterspoor 5–10 mm smaller voor meer zijgrip en tractie.",
+          "Voeg 1 tik caster toe zodat de kart meer binnenste achterwiel-lift maakt."
+        ],
+        big: [
+          "Zet de rijhoogte voor én achter 1 klik hoger voor meer gewichtsverplaatsing.",
+          "Gebruik een zachtere as zodat de achterkant makkelijker kan squatten.",
+          "Stoel iets hoger plaatsen om het zwaartepunt te verhogen en de kart meer te laten werken."
+        ],
+        notes: "In low grip mag de kart best wat bewegen. Liever een beetje levendig dan dood en glijdend."
+      },
+      high_grip: {
+        title: "Te veel grip / hoge grip (baan vol rubber, kart plakt)",
+        small: [
+          "Verlaag bandendruk iets om ze koeler en constanter te houden.",
+          "Maak de achterspoor 5–10 mm breder zodat de kart vrijer rolt.",
+          "Neem 1 tik caster weg om de lift te verminderen."
+        ],
+        big: [
+          "Gebruik een hardere as om de kart losser te maken en hoppen te verminderen.",
+          "Zet rijhoogte zo laag mogelijk (vooral achter) binnen wat de regels toestaan.",
+          "Stoel iets lager of verder naar achter om het zwaartepunt te verlagen en binding te verminderen."
+        ],
+        notes: "In high grip is de kunst om de kart losser te maken zonder té veel totale grip te verliezen."
+      },
+      nervous_straight: {
+        title: "Kart nerveus rechtuit / bij snelle richtingswissels",
+        small: [
+          "Neem 1 tik caster weg zodat de kart rustiger wordt rond de middenstand.",
+          "Controleer of je voorspoor niet té breed staat; maak het 5–10 mm smaller als het extreem is.",
+          "Controleer uitlijning (toe-in/out); een beetje toe-in kan de kart rechtuit stabieler maken."
+        ],
+        big: [
+          "Gebruik een iets zachtere voor torsiestang (of haal hem weg) om de voorkant minder ‘direct’ te maken.",
+          "Stoel heel licht naar achter verplaatsen kan helpen als je veel gewicht op de neus hebt.",
+          "Bandendruk voor een fractie omlaag om de kart minder ‘springerig’ te maken op kerbs."
+        ],
+        notes: "Rechtuit nervositeit is vaak combinatie van te agressieve voorzijde (caster/spoor) en bump-steer. Kleine veranderingen maken al veel verschil."
+      },
+      braking_instability: {
+        title: "Onstabiel bij remmen (achter breekt uit)",
+        small: [
+          "Zorg dat je rechtuit remt; als je al instuurt tijdens remmen wordt hij snel zenuwachtig.",
+          "Maak de achterspoor 5–10 mm smaller voor meer stabiliteit onder remmen.",
+          "Verlaag bandendruk achter iets als de banden blokkeren en gaan glijden."
+        ],
+        big: [
+          "Ga naar een zachtere achteras als de achterkant heel stijf is en direct blokkeert.",
+          "Zet de achterkant 1 klik hoger in rijhoogte voor meer grip achter bij remmen.",
+          "Verplaats de stoel een paar mm naar achter voor iets meer gewicht op de achteras tijdens remmen."
+        ],
+        notes: "Rem-onstabiliteit los je meestal op via extra achtergrip en een iets rustiger voorzijde. Vergeet rijstijl niet: progressief remmen helpt enorm."
+      },
+      too_much_lift: {
+        title: "Kart tilt bijna op 2 wielen / extreem veel lift",
+        small: [
+          "Neem 1–2 tikken caster weg om minder agressieve jacking te krijgen.",
+          "Maak de achterspoor 5–10 mm breder zodat de kart stabieler is bij hoge laterale krachten.",
+          "Verlaag bandendruk iets zodat de banden minder ‘happen’."
+        ],
+        big: [
+          "Gebruik een hardere as om de flex te beperken en de kart lager ‘in’ het rubber te houden.",
+          "Zet rijhoogte voor én achter 1 klik lager om het zwaartepunt omlaag te brengen.",
+          "Stoel iets lager plaatsen en eventueel een achter torsiestang toevoegen voor meer stabiliteit."
+        ],
+        notes: "Als de kart bijna op 2 wielen gaat, heb je veel te veel gewichtsoverdracht. Minder caster, lager rijden en bredere achterspoor helpen het meest."
+      },
+      rain: {
+        title: "Regen / full wet setup",
+        small: [
+          "Verhoog bandendruk t.o.v. droog om de banden sneller warm te krijgen.",
+          "Maak de achterspoor smaller voor meer tractie (richting CKR rain-waarde uit de tabel).",
+          "Voeg 1–2 tikken caster toe voor scherper insturen en meer lift."
+        ],
+        big: [
+          "Zet rijhoogte voor én achter zo hoog mogelijk voor extra mechanische grip.",
+          "Gebruik een zachtere as zodat de achterkant makkelijker kan werken en grip opbouwt.",
+          "Stoel hoger zetten voor een hoger zwaartepunt en meer gewichtsverplaatsing."
+        ],
+        notes: "Rijlijn in de regen: meer naast het rubber, vooral op het schone asfalt rijden, rustig met stuur en gas. Setup helpt, maar rijstijl is mega belangrijk."
+      }
+    };
+
+    function getAdvice(symptom, condition) {
+      const base = setupData[symptom];
+      if (!base) return null;
+
+      const extraNotes = [];
+
+      if (condition === "dry_low" && symptom !== "rain") {
+        extraNotes.push(
+          "Baanconditie: droog met weinig grip → durf iets agressiever met caster/rijhoogte en een zachtere as te gaan."
+        );
+      }
+
+      if (condition === "dry_high" && symptom !== "rain") {
+        extraNotes.push(
+          "Baanconditie: droog met hoge grip → let op hoppen. Hardere as, lagere rijhoogte en bredere achterspoor helpen vaak."
+        );
+      }
+
+      if (condition === "rain_mixed") {
+        extraNotes.push(
+          "Baanconditie: natte plekken / opdrogende baan → vaak iets tussen droog en full wet in: rijhoogte niet maximaal hoog, bandendruk iets boven droog maar onder full wet, achterspoor niet maximaal smal."
+        );
+      }
+
+      if (condition === "rain_full" && symptom !== "rain") {
+        extraNotes.push(
+          "Je hebt full-wet omstandigheden opgegeven. Kijk ook bij de aparte ‘Regen / full wet’ optie voor een complete regensetup."
+        );
+      }
+
+      return {
+        ...base,
+        extraNotes
+      };
+    }
+
+    function renderAdvice(advice) {
+      const output = document.getElementById("output");
+      if (!advice) {
+        output.innerHTML = `
+          <div class="card">
+            <h2>Onbekende combinatie<span>Let op</span></h2>
+            <small>Ik heb voor deze combinatie nog geen regels. Kies een andere klacht of pas de data in het script aan.</small>
+            <ul>
+              <li>Controleer eerst je baseline setup (zoals in de CKR tabel).</li>
+              <li>Verander maar één ding tegelijk en hou tijden bij.</li>
+            </ul>
+          </div>
+        `;
+        return;
+      }
+
+      const smallList = advice.small.map(item => `<li>${item}</li>`).join("");
+      const bigList = advice.big.map(item => `<li>${item}</li>`).join("");
+
+      const extraNotesHtml = advice.extraNotes && advice.extraNotes.length
+        ? `<div class="note">${advice.extraNotes.join("<br>")}</div>`
+        : "";
+
+      output.innerHTML = `
+        <div class="card">
+          <h2>${advice.title}<span>Voorstel</span></h2>
+          <small>Eerst kleine stappen, dan grotere wijzigingen. Altijd checken met de stopwatch.</small>
+
+          <strong style="font-size:0.82rem;">Eerst proberen (kleine aanpassingen)</strong>
+          <ul>${smallList}</ul>
+
+          <strong style="font-size:0.82rem; display:block; margin-top:6px;">Grotere veranderingen (stap 2)</strong>
+          <ul>${bigList}</ul>
+
+          <div class="note">${advice.notes}</div>
+          ${extraNotesHtml}
+        </div>
+      `;
+    }
+
+    document.getElementById("showAdvice").addEventListener("click", () => {
+      const symptom = document.getElementById("symptom").value;
+      const condition = document.getElementById("condition").value;
+      const advice = getAdvice(symptom, condition);
+      renderAdvice(advice);
+    });
+  </script>
+</body>
 </html>
