@@ -1,6 +1,93 @@
-<!doctype html> <html lang="nl"> <head> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1"> <title>GPS Hoogte</title> <meta name="theme-color" content="#111111"> <link rel="manifest" href="./manifest.webmanifest"> <link rel="apple-touch-icon" href="./icon-192.png"> <style> body{font-family:Arial,sans-serif;padding:16px} button{font-size:16px;padding:10px 14px} .row{margin-top:12px} .small{font-size:12px;opacity:0.8} </style> </head> <body> <h1>GPS hoogte</h1>
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GPS Hoogte Test</title>
+<style>
+body{font-family:Arial,sans-serif;padding:16px}
+button{font-size:16px;padding:10px 14px}
+.row{margin-top:12px}
+</style>
+</head>
+<body>
 
+<h1>GPS hoogte</h1>
 <button id="btn">Meet hoogte</button>
-<button id="auto" style="margin-left:8px">Auto uit</button>
 
-<div class="row">Status: <span id="status">klaar</span></div> <div class="row" id="coords"></div> <div class="row" id="result"></div> <div class="row small" id="hint"></div> <script src="./app.js"></script> </body> </html>
+<div class="row">Status: <span id="status">klaar</span></div>
+<div class="row" id="log"></div>
+<div class="row" id="coords"></div>
+<div class="row" id="result"></div>
+
+<script>
+const API_KEY = "bf7f0baaa9b0a00164c28205f407843a0fbcb9d9"
+
+const btn = document.getElementById("btn")
+const statusEl = document.getElementById("status")
+const logEl = document.getElementById("log")
+const coordsEl = document.getElementById("coords")
+const resultEl = document.getElementById("result")
+
+function setStatus(t){ statusEl.textContent = t }
+function setLog(t){ logEl.textContent = t }
+
+function getGps(){
+return new Promise(function(resolve, reject){
+navigator.geolocation.getCurrentPosition(
+function(pos){ resolve(pos) },
+function(err){ reject(new Error("GPS fout " + err.code + " " + err.message)) },
+{ enableHighAccuracy:true, timeout:15000, maximumAge:0 }
+)
+})
+}
+
+async function getElevation(lat, lon){
+const url =
+"https://tessadem.com/api/elevation?key=" +
+encodeURIComponent(API_KEY) +
+"&locations=" +
+encodeURIComponent(lat + "," + lon) +
+"&unit=meters"
+
+const r = await fetch(url)
+if(!r.ok){
+const txt = await r.text().catch(function(){ return "" })
+throw new Error("API fout " + r.status + " " + txt)
+}
+const data = await r.json()
+const elev = data && data.results && data.results[0] ? data.results[0].elevation : null
+if(typeof elev !== "number") throw new Error("Geen hoogte terug")
+return elev
+}
+
+btn.addEventListener("click", async function(){
+try{
+setStatus("GPS ophalen")
+setLog("wachten op toestemming")
+coordsEl.textContent = ""
+resultEl.textContent = ""
+
+const pos = await getGps()
+const lat = pos.coords.latitude
+const lon = pos.coords.longitude
+const acc = Math.round(pos.coords.accuracy)
+
+coordsEl.textContent = "lat " + lat + " lon " + lon + " acc " + acc + " m"
+
+setStatus("Hoogte ophalen")
+setLog("API call")
+const h = await getElevation(lat, lon)
+
+setStatus("klaar")
+setLog("klaar")
+resultEl.textContent = "Hoogte " + h.toFixed(1) + " m"
+}catch(e){
+setStatus("fout")
+setLog(String(e.message || e))
+}
+})
+</script>
+
+</body>
+</html>
