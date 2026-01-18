@@ -1,0 +1,7 @@
+{
+  "name": "PeakNL - Elevation Tracker",
+  "description": "A modern, high-precision elevation measurement app specifically designed for the Netherlands' unique topographical landscape. Features offline capabilities and NAP-referenced data.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
