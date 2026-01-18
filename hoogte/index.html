@@ -3,46 +3,55 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GPS Hoogte Debug</title>
+<title>GPS Hoogte</title>
 <style>
 body{font-family:Arial,sans-serif;padding:16px}
-button{font-size:16px;padding:10px 14px}
+button{font-size:16px;padding:10px 14px;margin-right:8px}
 .row{margin-top:12px}
+.small{font-size:12px;opacity:0.8}
 </style>
 </head>
 <body>
 
 <h1>GPS hoogte</h1>
 
-<button onclick="testKlik()">Test klik</button>
-<button onclick="meetHoogte()">Meet hoogte</button>
+<button id="btn">Meet hoogte</button>
+<button id="perm">Check toestemming</button>
 
 <div class="row">Status: <span id="status">klaar</span></div>
 <div class="row" id="log"></div>
 <div class="row" id="coords"></div>
 <div class="row" id="result"></div>
+<div class="row small" id="hint"></div>
 
 <script>
-const API_KEY = "bf7f0baaa9b0a00164c28205f407843a0fbcb9d9"
+const API_KEY = "JOUW_KEY_HIER"
 
 const statusEl = document.getElementById("status")
 const logEl = document.getElementById("log")
 const coordsEl = document.getElementById("coords")
 const resultEl = document.getElementById("result")
+const hintEl = document.getElementById("hint")
+const btn = document.getElementById("btn")
+const permBtn = document.getElementById("perm")
 
 function setStatus(t){ statusEl.textContent = t }
 function setLog(t){ logEl.textContent = t }
 
-function testKlik(){
-setStatus("klik werkt")
-setLog("js draait")
-alert("klik werkt")
+function checkPermission(){
+if(navigator.permissions){
+navigator.permissions.query({name:"geolocation"}).then(function(p){
+setLog("permission state: " + p.state)
+})
+}else{
+setLog("permissions api niet beschikbaar")
+}
 }
 
 function getGps(){
-return new Promise(function(resolve, reject){
+return new Promise(function(resolve,reject){
 if(!navigator.geolocation){
-reject(new Error("Geen geolocation"))
+reject(new Error("Geen geolocation in deze browser"))
 return
 }
 navigator.geolocation.getCurrentPosition(
@@ -53,7 +62,7 @@ function(err){ reject(new Error("GPS fout " + err.code + " " + err.message)) },
 })
 }
 
-async function getElevation(lat, lon){
+async function getElevation(lat,lon){
 const url =
 "https://tessadem.com/api/elevation?key=" +
 encodeURIComponent(API_KEY) +
@@ -72,12 +81,13 @@ if(typeof elev !== "number") throw new Error("Geen hoogte terug")
 return elev
 }
 
-async function meetHoogte(){
+async function measure(){
 try{
 setStatus("GPS ophalen")
 setLog("wachten op toestemming")
 coordsEl.textContent = ""
 resultEl.textContent = ""
+hintEl.textContent = ""
 
 const pos = await getGps()
 const lat = pos.coords.latitude
@@ -88,18 +98,25 @@ coordsEl.textContent = "lat " + lat + " lon " + lon + " acc " + acc + " m"
 
 setStatus("Hoogte ophalen")
 setLog("API call")
-const h = await getElevation(lat, lon)
+const h = await getElevation(lat,lon)
 
 setStatus("klaar")
 setLog("klaar")
 resultEl.textContent = "Hoogte " + h.toFixed(1) + " m"
+hintEl.textContent = "Werkt alleen goed op https of GitHub Pages"
 }catch(e){
 setStatus("fout")
 setLog(String(e.message || e))
 }
 }
 
-setLog("pagina geladen")
+btn.addEventListener("click", function(){
+measure()
+})
+
+permBtn.addEventListener("click", function(){
+checkPermission()
+})
 </script>
 
 </body>
