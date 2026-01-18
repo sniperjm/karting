@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GPS Hoogte Test</title>
+<title>GPS Hoogte Debug</title>
 <style>
 body{font-family:Arial,sans-serif;padding:16px}
 button{font-size:16px;padding:10px 14px}
@@ -13,7 +13,9 @@ button{font-size:16px;padding:10px 14px}
 <body>
 
 <h1>GPS hoogte</h1>
-<button id="btn">Meet hoogte</button>
+
+<button onclick="testKlik()">Test klik</button>
+<button onclick="meetHoogte()">Meet hoogte</button>
 
 <div class="row">Status: <span id="status">klaar</span></div>
 <div class="row" id="log"></div>
@@ -23,7 +25,6 @@ button{font-size:16px;padding:10px 14px}
 <script>
 const API_KEY = "bf7f0baaa9b0a00164c28205f407843a0fbcb9d9"
 
-const btn = document.getElementById("btn")
 const statusEl = document.getElementById("status")
 const logEl = document.getElementById("log")
 const coordsEl = document.getElementById("coords")
@@ -32,8 +33,18 @@ const resultEl = document.getElementById("result")
 function setStatus(t){ statusEl.textContent = t }
 function setLog(t){ logEl.textContent = t }
 
+function testKlik(){
+setStatus("klik werkt")
+setLog("js draait")
+alert("klik werkt")
+}
+
 function getGps(){
 return new Promise(function(resolve, reject){
+if(!navigator.geolocation){
+reject(new Error("Geen geolocation"))
+return
+}
 navigator.geolocation.getCurrentPosition(
 function(pos){ resolve(pos) },
 function(err){ reject(new Error("GPS fout " + err.code + " " + err.message)) },
@@ -61,7 +72,7 @@ if(typeof elev !== "number") throw new Error("Geen hoogte terug")
 return elev
 }
 
-btn.addEventListener("click", async function(){
+async function meetHoogte(){
 try{
 setStatus("GPS ophalen")
 setLog("wachten op toestemming")
@@ -86,7 +97,9 @@ resultEl.textContent = "Hoogte " + h.toFixed(1) + " m"
 setStatus("fout")
 setLog(String(e.message || e))
 }
-})
+}
+
+setLog("pagina geladen")
 </script>
 
 </body>
