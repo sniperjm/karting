@@ -3,71 +3,26 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>JanFred Prisma Sproeier Calculator</title>
+  <title>Prisma Rotax Senior Jet Calculator</title>
 
   <style>
-    :root {
+    :root{
       --bg:#0f1115;
       --panel:#161a22;
       --text:#e8ecf1;
       --muted:#9aa4b2;
-      --accent:#ff2d55;
+      --border:#252b36;
       --good:#2ecc71;
       --bad:#e74c3c;
-      --border:#252b36;
     }
-
-    * { box-sizing:border-box }
-
-    body {
-      margin:0;
-      background:var(--bg);
-      color:var(--text);
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;
-    }
-
-    header {
-      padding:14px;
-      border-bottom:1px solid var(--border);
-    }
-
-    h1 {
-      margin:0;
-      font-size:22px;
-    }
-
-    header p {
-      margin:4px 0 0;
-      font-size:13px;
-      color:var(--muted);
-    }
-
-    .card {
-      background:var(--panel);
-      border:1px solid var(--border);
-      border-radius:14px;
-      margin:14px;
-      padding:14px;
-    }
-
-    .grid {
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-    }
-
-    .full {
-      grid-column:1 / -1;
-    }
-
-    label {
-      font-size:12px;
-      color:var(--muted);
-      display:block;
-      margin-bottom:4px;
-    }
-
-    input {
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial}
+    header{padding:14px;border-bottom:1px solid var(--border)}
+    h1{margin:0;font-size:18px}
+    header p{margin:6px 0 0;color:var(--muted);font-size:13px}
+    .card{background:var(--panel);border:1px solid var(--border);border-radius:14px;margin:14px;padding:14px}
+    label{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}
+    input{
       width:100%;
       padding:12px;
       border-radius:12px;
@@ -76,166 +31,90 @@
       color:var(--text);
       font-size:16px;
     }
-
-    .result {
-      font-size:44px;
-      font-weight:800;
-      margin:0;
-    }
-
-    .tag {
+    .soft{color:var(--muted);font-size:12px;margin-top:8px}
+    .row{display:flex;align-items:baseline;gap:10px}
+    .result{font-size:44px;font-weight:800;margin:0;line-height:1}
+    .tag{
       display:inline-block;
       padding:4px 10px;
       border-radius:999px;
       font-size:12px;
       border:1px solid var(--border);
       background:#0c0f14;
-      margin-left:8px;
-    }
-
-    .rich { color:var(--good) }
-    .lean { color:var(--bad) }
-
-    .soft {
-      font-size:12px;
       color:var(--muted);
     }
-
-    .btn {
-      margin-top:10px;
-      width:100%;
-      padding:12px;
-      border:none;
-      border-radius:12px;
-      background:var(--accent);
-      color:white;
-      font-size:16px;
-      font-weight:700;
-      cursor:pointer;
-    }
+    .rich{color:var(--good)}
+    .lean{color:var(--bad)}
   </style>
 </head>
 
 <body>
+  <header>
+    <h1>Rotax Senior Jet Calculator</h1>
+    <p>Prisma stijl. Input is alleen Air Density. Geen berekening uit druk of temperatuur.</p>
+  </header>
 
-<header>
-  <h1>JanFred Prisma Sproeier Calculator</h1>
-  <p>Rotax Max Senior EVO • Prisma calculator</p>
-</header>
+  <section class="card">
+    <label>Air Density (kg/m³)</label>
+    <input id="rho" type="number" step="0.001" inputmode="decimal" placeholder="Bijvoorbeeld 1.290">
+    <div class="soft">Tip: vul hier de waarde in die je meter of Prisma site gebruikt.</div>
+  </section>
 
-<section class="card">
-  <div class="grid">
-    <div>
-      <label>Temperatuur °C</label>
-      <input id="temp" type="number" value="20">
+  <section class="card">
+    <div class="soft">Aanbevolen sproeier</div>
+    <div class="row">
+      <div id="jet" class="result">—</div>
+      <div id="pct" class="tag">—</div>
     </div>
+  </section>
 
-    <div>
-      <label>Luchtdruk hPa</label>
-      <input id="pressure" type="number" value="1013.25">
-    </div>
+  <script>
+    const RHO_STD = 1.225;
 
-    <div>
-      <label>Relatieve vochtigheid %</label>
-      <input id="rh" type="number" value="50">
-    </div>
+    // Rotax Senior baseline zoals Prisma uitlegt met % t.o.v. 1.225 kg/m³. :contentReference[oaicite:0]{index=0}
+    const BASELINE = 133;
 
-    <div>
-      <label>Luchtdichtheid ρ kg/m³</label>
-      <input id="rho" type="number" step="0.001" placeholder="Leeg = automatisch">
-    </div>
-  </div>
+    // Afgesteld op jouw Prisma voorbeeld: rho 1.290 geeft 140.
+    // Dit geeft 140 bij 1.290 door dezelfde % schaal te gebruiken.
+    const SLOPE_JET_PER_PCT = 1.32;
 
-  <button class="btn" id="calcRho">Bereken ρ uit T, P, rH</button>
-
-  <div class="soft" style="margin-top:8px">
-    Ingevulde ρ heeft altijd voorrang.
-  </div>
-</section>
-
-<section class="card">
-  <div class="soft">Aanbevolen sproeier</div>
-  <div>
-    <span id="jet" class="result">—</span>
-    <span id="flag" class="tag">—</span>
-  </div>
-</section>
-
-<script>
-  const R_d = 287.058;
-  const R_v = 461.495;
-
-  const RHO_STD = 1.225;
-  const BASELINE = 133;
-  const SLOPE = 1.32;
-
-  function es_hPa(Tc) {
-    return 6.112 * Math.exp((17.62 * Tc) / (243.12 + Tc));
-  }
-
-  function computeDensity(Tc, P_hPa, RH) {
-    const T = Tc + 273.15;
-    const P = P_hPa * 100;
-    const e = es_hPa(Tc) * (RH / 100);
-    const ePa = e * 100;
-    const Pd = P - ePa;
-    return (Pd / (R_d * T)) + (ePa / (R_v * T));
-  }
-
-  function densityDeltaPct(rho) {
-    return ((rho - RHO_STD) / RHO_STD) * 100;
-  }
-
-  function update() {
-    const Tc = parseFloat(temp.value);
-    const P  = parseFloat(pressure.value);
-    const RH = parseFloat(rh.value);
-
-    let rho;
-
-    if (rhoInput.value !== "") {
-      rho = parseFloat(rhoInput.value);
-    } else {
-      rho = computeDensity(Tc, P, RH);
+    function readNumber(id){
+      const raw = (document.getElementById(id).value || "").toString().trim();
+      if (!raw) return null;
+      const n = parseFloat(raw.replace(",", "."));
+      return isFinite(n) ? n : null;
     }
 
-    if (!isFinite(rho)) {
-      jet.textContent = "—";
-      flag.textContent = "—";
-      return;
+    function clamp(v, lo, hi){
+      return Math.max(lo, Math.min(hi, v));
     }
 
-    const dPct = densityDeltaPct(rho);
-    const jetValue = Math.round(BASELINE + dPct * SLOPE);
+    function update(){
+      const rho = readNumber("rho");
+      const jetEl = document.getElementById("jet");
+      const pctEl = document.getElementById("pct");
 
-    jet.textContent = jetValue;
-    flag.textContent = (dPct > 0 ? "+" : "") + dPct.toFixed(1) + "% ρ";
-    flag.className = "tag " + (dPct > 0 ? "rich" : "lean");
-  }
+      if (rho === null){
+        jetEl.textContent = "—";
+        pctEl.textContent = "—";
+        pctEl.className = "tag";
+        return;
+      }
 
-  const temp = document.getElementById("temp");
-  const pressure = document.getElementById("pressure");
-  const rh = document.getElementById("rh");
-  const rhoInput = document.getElementById("rho");
-  const jet = document.getElementById("jet");
-  const flag = document.getElementById("flag");
+      const pct = ((rho - RHO_STD) / RHO_STD) * 100;
+      let jet = BASELINE + (pct * SLOPE_JET_PER_PCT);
+      jet = Math.round(jet);
+      jet = clamp(jet, 115, 155);
 
-  document.querySelectorAll("input").forEach(i =>
-    i.addEventListener("input", update)
-  );
+      jetEl.textContent = jet;
 
-  document.getElementById("calcRho").addEventListener("click", () => {
-    const rho = computeDensity(
-      parseFloat(temp.value),
-      parseFloat(pressure.value),
-      parseFloat(rh.value)
-    );
-    rhoInput.value = rho.toFixed(3);
+      const sign = pct > 0 ? "+" : "";
+      pctEl.textContent = sign + pct.toFixed(1) + "%";
+      pctEl.className = "tag " + (pct >= 0 ? "rich" : "lean");
+    }
+
+    document.getElementById("rho").addEventListener("input", update);
     update();
-  });
-
-  update();
-</script>
-
+  </script>
 </body>
 </html>
