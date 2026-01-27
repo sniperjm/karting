@@ -47,14 +47,13 @@
     }
     .rich{color:var(--good)}
     .lean{color:var(--bad)}
-    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
   </style>
 </head>
 
 <body>
   <header>
     <h1>Rotax Jet Calculator</h1>
-    <p>Je vult Temp, Luchtdruk, Vochtigheid, Hoogte in. Airdensity ρ rekent automatisch. Als je ρ invult, gebruikt hij die.</p>
+    <p>Je vult alles zelf in. Jet volgt Prisma per motor op basis van Air Density.</p>
   </header>
 
   <section class="card">
@@ -72,36 +71,28 @@
 
       <div>
         <label>Temperatuur (°C)</label>
-        <input id="temp" type="number" inputmode="decimal" value="2.2">
+        <input id="temp" type="number" inputmode="decimal" placeholder="2.2">
       </div>
 
       <div>
         <label>Luchtdruk (hPa)</label>
-        <input id="pressure" type="number" inputmode="decimal" value="993.0">
+        <input id="pressure" type="number" inputmode="decimal" placeholder="993.0">
       </div>
 
       <div>
         <label>Vochtigheid (%)</label>
-        <input id="rh" type="number" inputmode="decimal" value="85">
+        <input id="rh" type="number" inputmode="decimal" placeholder="85">
       </div>
 
       <div>
         <label>Hoogte (m)</label>
-        <input id="alt" type="number" inputmode="decimal" value="6">
+        <input id="alt" type="number" inputmode="decimal" placeholder="6">
       </div>
 
       <div class="full">
-        <label>Airdensity ρ (kg/m³)</label>
-        <input id="rho" type="number" step="0.001" inputmode="decimal" placeholder="Leeg = automatisch">
-        <div class="soft">
-          Tip. Laat ρ leeg als je wil dat hij uit Temp, Druk en Vochtigheid rekent.
-          Hoogte gebruikt hij alleen als Druk leeg is, dan schat hij Druk uit Hoogte.
-        </div>
-      </div>
-
-      <div class="full">
-        <div class="soft">Gebruikte ρ</div>
-        <div id="rhoUsed" class="mono">—</div>
+        <label>Air Density ρ (kg/m³)</label>
+        <input id="rho" type="number" step="0.001" inputmode="decimal" placeholder="1.290">
+        <div class="soft">Alleen ρ wordt gebruikt voor de jet. De velden hierboven zijn alleen voor jouw overzicht.</div>
       </div>
     </div>
   </section>
@@ -116,23 +107,15 @@
 
   <script>
     const RHO_STD = 1.225;
+    const SLOPE = 1.32;
 
-    const R_d = 287.058;
-    const R_v = 461.495;
-
-    const SLOPE_JET_PER_PCT = 1.32;
-
-    const ENGINE_MAP = {
-      senior: { baseline: 133, minJet: 80, maxJet: 200 },
-      dd2:    { baseline: 137, minJet: 80, maxJet: 200 },
-      junior: { baseline: 135, minJet: 80, maxJet: 200 },
-      mini:   { baseline: 120, minJet: 80, maxJet: 200 },
-      micro:  { baseline: 114, minJet: 80, maxJet: 200 }
+    const ENGINE_BASELINE = {
+      senior: 133,
+      dd2: 137,
+      junior: 135,
+      mini: 120,
+      micro: 114
     };
-
-    function clamp(v, lo, hi){
-      return Math.max(lo, Math.min(hi, v));
-    }
 
     function readNumber(id){
       const raw = (document.getElementById(id).value || "").toString().trim();
@@ -141,82 +124,30 @@
       return isFinite(n) ? n : null;
     }
 
-    function rhoPct(rho){
-      return ((rho - RHO_STD) / RHO_STD) * 100;
-    }
-
-    function es_hPa(Tc){
-      return 6.112 * Math.exp((17.62 * Tc) / (243.12 + Tc));
-    }
-
-    function pressureFromAltitude_hPa(alt_m){
-      const h = Math.max(0, alt_m || 0);
-      const p0 = 1013.25;
-      const T0 = 288.15;
-      const g = 9.80665;
-      const L = 0.0065;
-      const M = 0.0289644;
-      const R = 8.3144598;
-      const exp = (g * M) / (R * L);
-      const term = 1 - (L * h) / T0;
-      const p = p0 * Math.pow(term, exp);
-      return p;
-    }
-
-    function computeDensityFrom_T_P_RH(Tc, P_hPa, RH){
-      const T = Tc + 273.15;
-      const P = P_hPa * 100;
-
-      const e = es_hPa(Tc) * (RH / 100);
-      const ePa = e * 100;
-
-      const Pd = P - ePa;
-      return (Pd / (R_d * T)) + (ePa / (R_v * T));
-    }
-
-    function getRhoUsed(){
-      const rhoManual = readNumber("rho");
-      if (rhoManual !== null) return rhoManual;
-
-      const Tc = readNumber("temp");
-      const RH = readNumber("rh");
-      let P = readNumber("pressure");
-
-      if (Tc === null || RH === null) return null;
-
-      if (P === null){
-        const alt = readNumber("alt") || 0;
-        P = pressureFromAltitude_hPa(alt);
-      }
-
-      return computeDensityFrom_T_P_RH(Tc, P, RH);
+    function clamp(v, lo, hi){
+      return Math.max(lo, Math.min(hi, v));
     }
 
     function update(){
-      const engineKey = document.getElementById("engine").value;
-      const cfg = ENGINE_MAP[engineKey] || ENGINE_MAP.senior;
-
-      const rho = getRhoUsed();
-
+      const rho = readNumber("rho");
       const jetEl = document.getElementById("jet");
       const pctEl = document.getElementById("pct");
-      const rhoUsedEl = document.getElementById("rhoUsed");
 
-      if (rho === null || !isFinite(rho)){
+      if (rho === null){
         jetEl.textContent = "—";
         pctEl.textContent = "—";
         pctEl.className = "tag";
-        rhoUsedEl.textContent = "—";
         return;
       }
 
-      rhoUsedEl.textContent = rho.toFixed(3);
+      const pct = ((rho - RHO_STD) / RHO_STD) * 100;
 
-      const pct = rhoPct(rho);
+      const engine = document.getElementById("engine").value;
+      const baseline = ENGINE_BASELINE[engine] ?? ENGINE_BASELINE.senior;
 
-      let jet = cfg.baseline + (pct * SLOPE_JET_PER_PCT);
+      let jet = baseline + (pct * SLOPE);
       jet = Math.round(jet);
-      jet = clamp(jet, cfg.minJet, cfg.maxJet);
+      jet = clamp(jet, 80, 200);
 
       jetEl.textContent = jet;
 
@@ -225,7 +156,7 @@
       pctEl.className = "tag " + (pct >= 0 ? "rich" : "lean");
     }
 
-    ["engine","temp","pressure","rh","alt","rho"].forEach(id=>{
+    ["engine","rho","temp","pressure","rh","alt"].forEach(id=>{
       document.getElementById(id).addEventListener("input", update);
     });
 
