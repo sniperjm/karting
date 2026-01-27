@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Prisma Rotax Senior Jet Calculator</title>
+  <title>Prisma Rotax Jet Calculator</title>
 
   <style>
     :root{
@@ -22,7 +22,7 @@
     header p{margin:6px 0 0;color:var(--muted);font-size:13px}
     .card{background:var(--panel);border:1px solid var(--border);border-radius:14px;margin:14px;padding:14px}
     label{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}
-    input{
+    input,select{
       width:100%;
       padding:12px;
       border-radius:12px;
@@ -50,14 +50,25 @@
 
 <body>
   <header>
-    <h1>Rotax Senior Jet Calculator</h1>
-    <p>Prisma stijl. Input is alleen Air Density. Geen berekening uit druk of temperatuur.</p>
+    <h1>Rotax Jet Calculator</h1>
+    <p>Prisma weergave. Input is alleen Air Density ρ.</p>
   </header>
 
   <section class="card">
+    <label>Rotax Engine</label>
+    <select id="engine">
+      <option value="dd2">Rotax DD2</option>
+      <option value="junior">Rotax Junior</option>
+      <option value="senior" selected>Rotax Senior</option>
+      <option value="mini">Rotax Mini</option>
+      <option value="micro">Rotax Micro</option>
+    </select>
+
+    <div style="height:10px"></div>
+
     <label>Air Density (kg/m³)</label>
     <input id="rho" type="number" step="0.001" inputmode="decimal" placeholder="Bijvoorbeeld 1.290">
-    <div class="soft">Tip: vul hier de waarde in die je meter of Prisma site gebruikt.</div>
+    <div class="soft">Vul dezelfde ρ in als Prisma of je densimeter.</div>
   </section>
 
   <section class="card">
@@ -71,12 +82,9 @@
   <script>
     const RHO_STD = 1.225;
 
-    // Rotax Senior baseline zoals Prisma uitlegt met % t.o.v. 1.225 kg/m³. :contentReference[oaicite:0]{index=0}
-    const BASELINE = 133;
-
-    // Afgesteld op jouw Prisma voorbeeld: rho 1.290 geeft 140.
-    // Dit geeft 140 bij 1.290 door dezelfde % schaal te gebruiken.
-    const SLOPE_JET_PER_PCT = 1.32;
+    function clamp(v, lo, hi){
+      return Math.max(lo, Math.min(hi, v));
+    }
 
     function readNumber(id){
       const raw = (document.getElementById(id).value || "").toString().trim();
@@ -85,11 +93,30 @@
       return isFinite(n) ? n : null;
     }
 
-    function clamp(v, lo, hi){
-      return Math.max(lo, Math.min(hi, v));
+    function rhoPct(rho){
+      return ((rho - RHO_STD) / RHO_STD) * 100;
     }
 
+    /*
+      Vastgezet op jouw Prisma meetpunt bij ρ = 1.290:
+      Senior 140, DD2 144, Junior 142, Mini 127, Micro 121
+      Dit geeft baselines (bij ρ = 1.225):
+      Senior 133, DD2 137, Junior 135, Mini 120, Micro 114
+    */
+    const SLOPE_JET_PER_PCT = 1.32;
+
+    const ENGINE_MAP = {
+      senior: { label: "Rotax Senior", baseline: 133, minJet: 80, maxJet: 200 },
+      dd2:    { label: "Rotax DD2",    baseline: 137, minJet: 80, maxJet: 200 },
+      junior: { label: "Rotax Junior", baseline: 135, minJet: 80, maxJet: 200 },
+      mini:   { label: "Rotax Mini",   baseline: 120, minJet: 80, maxJet: 200 },
+      micro:  { label: "Rotax Micro",  baseline: 114, minJet: 80, maxJet: 200 }
+    };
+
     function update(){
+      const engineKey = document.getElementById("engine").value;
+      const cfg = ENGINE_MAP[engineKey] || ENGINE_MAP.senior;
+
       const rho = readNumber("rho");
       const jetEl = document.getElementById("jet");
       const pctEl = document.getElementById("pct");
@@ -101,10 +128,11 @@
         return;
       }
 
-      const pct = ((rho - RHO_STD) / RHO_STD) * 100;
-      let jet = BASELINE + (pct * SLOPE_JET_PER_PCT);
+      const pct = rhoPct(rho);
+
+      let jet = cfg.baseline + (pct * SLOPE_JET_PER_PCT);
       jet = Math.round(jet);
-      jet = clamp(jet, 115, 155);
+      jet = clamp(jet, cfg.minJet, cfg.maxJet);
 
       jetEl.textContent = jet;
 
@@ -113,6 +141,7 @@
       pctEl.className = "tag " + (pct >= 0 ? "rich" : "lean");
     }
 
+    document.getElementById("engine").addEventListener("input", update);
     document.getElementById("rho").addEventListener("input", update);
     update();
   </script>
