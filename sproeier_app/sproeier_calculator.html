@@ -1,253 +1,241 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>JanFred Sproeier Calculator</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JanFred Prisma Sproeier Calculator</title>
+
   <style>
-    :root { --bg:#0f1115; --panel:#161a22; --text:#e8ecf1; --muted:#9aa4b2; --accent:#ff2d55; --good:#2ecc71; --border:#252b36; }
-    *{box-sizing:border-box}
-    html,body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;padding:0}
-    header{display:flex;align-items:center;gap:12px;padding:14px;min-height:80px;border-bottom:1px solid var(--border)}
-    .logo{height:60px;width:auto;flex:0 0 auto}
-    .titlewrap{display:flex;flex-direction:column;gap:4px;min-width:0}
-    h1{font-size:22px;margin:0;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    header p{margin:0;color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .card{background:var(--panel);border:1px solid var(--border);border-radius:14px;margin:14px;padding:14px}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .full{grid-column:1 / -1}
-    label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
-    input,select{width:100%;padding:12px 11px;border-radius:12px;border:1px solid var(--border);background:#0c0f14;color:var(--text);font-size:16px}
-    input[type="number"]::-webkit-outer-spin-button,
-    input[type="number"]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
-    .row{display:flex;gap:8px;align-items:center}
-    .result{font-size:42px;font-weight:800;margin:0}
-    .tag{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;margin-left:8px;border:1px solid var(--border);background:#0c0f14;color:var(--muted)}
-    .tag.lean{color:#e74c3c}
-    .tag.rich{color:var(--good)}
-    .tag.neutral{color:var(--muted)}
-    .soft{color:var(--muted);font-size:12px}
-    .btn{display:inline-block;padding:12px 16px;border-radius:12px;background:var(--accent);color:white;text-align:center;text-decoration:none;font-weight:700;border:none;cursor:pointer}
-    .inline{display:flex;justify-content:space-between;align-items:center;gap:10px}
-    .footer{padding:12px 16px 24px;color:var(--muted);font-size:12px;text-align:center}
-    .mode{font-weight:700}
-    .plug{font-weight:700}
-    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+    :root {
+      --bg:#0f1115;
+      --panel:#161a22;
+      --text:#e8ecf1;
+      --muted:#9aa4b2;
+      --accent:#ff2d55;
+      --good:#2ecc71;
+      --bad:#e74c3c;
+      --border:#252b36;
+    }
+
+    * { box-sizing:border-box }
+
+    body {
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;
+    }
+
+    header {
+      padding:14px;
+      border-bottom:1px solid var(--border);
+    }
+
+    h1 {
+      margin:0;
+      font-size:22px;
+    }
+
+    header p {
+      margin:4px 0 0;
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    .card {
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:14px;
+      margin:14px;
+      padding:14px;
+    }
+
+    .grid {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .full {
+      grid-column:1 / -1;
+    }
+
+    label {
+      font-size:12px;
+      color:var(--muted);
+      display:block;
+      margin-bottom:4px;
+    }
+
+    input {
+      width:100%;
+      padding:12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:#0c0f14;
+      color:var(--text);
+      font-size:16px;
+    }
+
+    .result {
+      font-size:44px;
+      font-weight:800;
+      margin:0;
+    }
+
+    .tag {
+      display:inline-block;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:12px;
+      border:1px solid var(--border);
+      background:#0c0f14;
+      margin-left:8px;
+    }
+
+    .rich { color:var(--good) }
+    .lean { color:var(--bad) }
+
+    .soft {
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .btn {
+      margin-top:10px;
+      width:100%;
+      padding:12px;
+      border:none;
+      border-radius:12px;
+      background:var(--accent);
+      color:white;
+      font-size:16px;
+      font-weight:700;
+      cursor:pointer;
+    }
   </style>
 </head>
+
 <body>
-  <header>
-    <img class="logo" src="logo.png" alt="Racing Team Cura logo" onerror="this.style.display='none'">
-    <div class="titlewrap">
-      <h1>JanFred Sproeier Calculator</h1>
-      <p id="subtitle">Rotax Max Senior EVO • <span class="mode">Prisma-modus</span> (baseline 133 @ 1.225 kg/m³)</p>
-    </div>
-  </header>
 
-  <section class="card">
-    <div class="grid">
-      <div class="full">
-        <label>Modus</label>
-        <select id="mode">
-          <option value="prisma" selected>Prisma-modus</option>
-          <option value="rule">Vuistregel-modus (1 jet per 1% ρ, baseline 131)</option>
-        </select>
-      </div>
+<header>
+  <h1>JanFred Prisma Sproeier Calculator</h1>
+  <p>Rotax Max Senior EVO • Prisma baseline 133 @ 1.225 kg/m³</p>
+</header>
 
-      <div>
-        <label>Temperatuur (°C)</label>
-        <input type="number" id="temp" inputmode="decimal" value="20" />
-      </div>
-
-      <div>
-        <label>Luchtdruk (hPa)</label>
-        <input type="number" id="pressure" inputmode="decimal" value="1013.25" />
-      </div>
-
-      <div>
-        <label>Relatieve vochtigheid (%)</label>
-        <input type="number" id="rh" inputmode="decimal" value="50" />
-      </div>
-
-      <div class="full">
-        <label>Luchtdichtheid ρ (kg/m³) (optioneel, heeft voorrang)</label>
-        <input type="number" id="rho" inputmode="decimal" step="0.001" placeholder="Laat leeg om te berekenen" value="" />
-      </div>
-
-      <div class="full">
-        <div class="inline">
-          <div class="soft">Knop zet ρ uit T, P, rH in het veld. Leeg veld betekent automatisch berekenen.</div>
-          <button id="useCalc" class="btn" style="background:#1d7cf2">Bereken ρ</button>
-        </div>
-      </div>
-
-      <div class="full">
-        <div class="soft">Gebruikte ρ</div>
-        <div id="rhoUsed" class="mono">—</div>
-      </div>
-    </div>
-  </section>
-
-  <section class="card">
-    <div class="inline">
-      <div>
-        <div class="soft">Aanbevolen sproeier</div>
-        <div class="row" style="align-items:baseline;gap:10px">
-          <h2 id="jet" class="result">—</h2>
-          <span id="flag" class="tag neutral">—</span>
-        </div>
-      </div>
-
-      <div>
-        <label for="baseline" class="soft">Baseline (alleen in Vuistregel)</label>
-        <input id="baseline" type="number" value="131" min="120" max="150" />
-      </div>
+<section class="card">
+  <div class="grid">
+    <div>
+      <label>Temperatuur °C</label>
+      <input id="temp" type="number" value="20">
     </div>
 
-    <div class="soft" style="margin-top:8px" id="ruleNote">
-      Vuistregel: 1 jet per 1% ρ verandering t.o.v. 1.225 kg/m³.
+    <div>
+      <label>Luchtdruk hPa</label>
+      <input id="pressure" type="number" value="1013.25">
     </div>
 
-    <div class="soft" style="margin-top:8px;display:none" id="prismaNote">
-      Prisma: baseline 133 bij 1.225 kg/m³. Afgerond op hele jets.
+    <div>
+      <label>Relatieve vochtigheid %</label>
+      <input id="rh" type="number" value="50">
     </div>
-  </section>
 
-  <section class="card">
-    <div class="grid">
-      <div class="full">
-        <label>Aanbevolen bougie (automatisch)</label>
-        <div class="row">
-          <div id="plugIcon" style="font-size:20px">⚖️</div>
-          <div id="plugText" class="plug">Denso IW27 (gap 0.6 mm)</div>
-        </div>
-        <div class="soft">Boven 1.220 IW24. 1.200 tot 1.220 IW27. Onder 1.200 IW29.</div>
-      </div>
+    <div>
+      <label>Luchtdichtheid ρ kg/m³</label>
+      <input id="rho" type="number" step="0.001" placeholder="Leeg = automatisch">
     </div>
-  </section>
+  </div>
 
-  <section class="footer">
-    <div>Tip: als GitHub Pages raar doet, doe Ctrl + F5.</div>
-  </section>
+  <button class="btn" id="calcRho">Bereken ρ uit T, P, rH</button>
+
+  <div class="soft" style="margin-top:8px">
+    Ingevulde ρ heeft altijd voorrang, net als bij Prisma.
+  </div>
+</section>
+
+<section class="card">
+  <div class="soft">Aanbevolen sproeier</div>
+  <div>
+    <span id="jet" class="result">—</span>
+    <span id="flag" class="tag">—</span>
+  </div>
+</section>
 
 <script>
   const R_d = 287.058;
   const R_v = 461.495;
   const RHO_STD = 1.225;
 
-  function es_hPa(Tc){
+  const BASELINE = 133;
+  const SLOPE = 1.32;
+
+  function es_hPa(Tc) {
     return 6.112 * Math.exp((17.62 * Tc) / (243.12 + Tc));
   }
 
-  function computeDensity(Tc, P_hPa, RH){
+  function computeDensity(Tc, P_hPa, RH) {
     const T = Tc + 273.15;
     const P = P_hPa * 100;
     const e = es_hPa(Tc) * (RH / 100);
-    const e_Pa = e * 100;
-    const Pd = P - e_Pa;
-    return (Pd / (R_d * T)) + (e_Pa / (R_v * T));
+    const ePa = e * 100;
+    const Pd = P - ePa;
+    return (Pd / (R_d * T)) + (ePa / (R_v * T));
   }
 
-  function densityPercentDelta(rho){
-    return ((rho - RHO_STD) / RHO_STD) * 100.0;
+  function densityDeltaPct(rho) {
+    return ((rho - RHO_STD) / RHO_STD) * 100;
   }
 
-  function clamp(v, lo, hi){
-    return Math.max(lo, Math.min(hi, v));
-  }
+  function update() {
+    const Tc = parseFloat(temp.value);
+    const P  = parseFloat(pressure.value);
+    const RH = parseFloat(rh.value);
 
-  function readNumber(id, fallback){
-    const v = document.getElementById(id).value;
-    const n = parseFloat((v || "").toString().replace(",", "."));
-    return isFinite(n) ? n : fallback;
-  }
+    let rho;
 
-  function readRhoOrNull(){
-    const raw = (document.getElementById("rho").value || "").toString().trim();
-    if (raw === "") return null;
-    const n = parseFloat(raw.replace(",", "."));
-    return isFinite(n) ? n : null;
-  }
-
-  const MODES = {
-    prisma: { baseline: 133, slope: 1.32 },
-    rule:   { baseline: null, slope: 1.0 }
-  };
-
-  function recommendJet(rho, mode, baselineInput){
-    const dPct = densityPercentDelta(rho);
-    let baseline = baselineInput;
-    let slope = MODES.rule.slope;
-
-    if (mode === "prisma") {
-      baseline = MODES.prisma.baseline;
-      slope = MODES.prisma.slope;
-    }
-
-    let jet = baseline + (dPct * slope);
-    jet = Math.round(jet);
-    return clamp(jet, 115, 155);
-  }
-
-  function recommendPlug(rho){
-    if (rho > 1.220) return {icon:"🔥", text:"Denso IW24 (gap 0.6 mm)"};
-    if (rho < 1.200) return {icon:"❄️", text:"Denso IW29 (gap 0.6 mm)"};
-    return {icon:"⚖️", text:"Denso IW27 (gap 0.6 mm)"};
-  }
-
-  function update(){
-    const Tc = readNumber("temp", 20);
-    const P  = readNumber("pressure", 1013.25);
-    const RH = readNumber("rh", 50);
-
-    const mode = document.getElementById("mode").value;
-    const baselineInput = readNumber("baseline", 131);
-
-    document.getElementById("ruleNote").style.display = (mode === "rule") ? "block" : "none";
-    document.getElementById("prismaNote").style.display = (mode === "prisma") ? "block" : "none";
-
-    document.getElementById("subtitle").innerHTML = (mode === "prisma")
-      ? "Rotax Max Senior EVO • <span class='mode'>Prisma-modus</span> (baseline 133 @ 1.225 kg/m³)"
-      : "Rotax Max Senior EVO • <span class='mode'>Vuistregel-modus</span> (baseline aanpasbaar)";
-
-    const rhoManual = readRhoOrNull();
-    const rho = (rhoManual !== null) ? rhoManual : computeDensity(Tc, P, RH);
-
-    document.getElementById("rhoUsed").textContent = isFinite(rho) ? rho.toFixed(3) : "—";
-
-    const jet = isFinite(rho) ? recommendJet(rho, mode, baselineInput) : NaN;
-    document.getElementById("jet").textContent = isFinite(jet) ? jet : "—";
-
-    const dPct = isFinite(rho) ? densityPercentDelta(rho) : NaN;
-    const flag = document.getElementById("flag");
-
-    if (!isFinite(dPct)) {
-      flag.textContent = "—";
-      flag.className = "tag neutral";
+    if (rhoInput.value !== "") {
+      rho = parseFloat(rhoInput.value);
     } else {
-      const sign = (dPct > 0) ? "+" : "";
-      flag.textContent = sign + dPct.toFixed(1) + "% ρ";
-      if (Math.abs(dPct) < 0.05) flag.className = "tag neutral";
-      else flag.className = "tag " + (dPct > 0 ? "rich" : "lean");
+      rho = computeDensity(Tc, P, RH);
     }
 
-    const plug = isFinite(rho) ? recommendPlug(rho) : {icon:"⚖️", text:"Denso IW27 (gap 0.6 mm)"};
-    document.getElementById("plugIcon").textContent = plug.icon;
-    document.getElementById("plugText").textContent = plug.text;
+    if (!isFinite(rho)) {
+      jet.textContent = "—";
+      flag.textContent = "—";
+      return;
+    }
+
+    const dPct = densityDeltaPct(rho);
+    const jetValue = Math.round(BASELINE + dPct * SLOPE);
+
+    jet.textContent = jetValue;
+    flag.textContent = (dPct > 0 ? "+" : "") + dPct.toFixed(1) + "% ρ";
+    flag.className = "tag " + (dPct > 0 ? "rich" : "lean");
   }
 
-  document.querySelectorAll("input,select").forEach(el => el.addEventListener("input", update));
+  const temp = document.getElementById("temp");
+  const pressure = document.getElementById("pressure");
+  const rh = document.getElementById("rh");
+  const rhoInput = document.getElementById("rho");
+  const jet = document.getElementById("jet");
+  const flag = document.getElementById("flag");
 
-  document.getElementById("useCalc").addEventListener("click", () => {
-    const Tc = readNumber("temp", 20);
-    const P  = readNumber("pressure", 1013.25);
-    const RH = readNumber("rh", 50);
-    const rho = computeDensity(Tc, P, RH);
-    document.getElementById("rho").value = isFinite(rho) ? rho.toFixed(3) : "";
+  document.querySelectorAll("input").forEach(i =>
+    i.addEventListener("input", update)
+  );
+
+  document.getElementById("calcRho").addEventListener("click", () => {
+    const rho = computeDensity(
+      parseFloat(temp.value),
+      parseFloat(pressure.value),
+      parseFloat(rh.value)
+    );
+    rhoInput.value = rho.toFixed(3);
     update();
   });
 
   update();
 </script>
+
 </body>
 </html>
