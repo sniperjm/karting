@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JanFred Sproeier Calculator</title>
+    <meta name="theme-color" content="#ff2d55" />
+    <style>
+      :root {
+        --bg: #0f1115;
+        --panel: #161a22;
+        --text: #e8ecf1;
+        --muted: #9aa4b2;
+        --accent: #ff2d55;
+        --good: #2ecc71;
+        --border: #252b36;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px;
+        min-height: 80px;
+        border-bottom: 1px solid var(--border);
+      }
+      .logo {
+        height: 60px;
+        width: auto;
+        flex: 0 0 auto;
+        filter: saturate(110%);
+      }
+      .titlewrap {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+      }
+      h1 {
+        font-size: 22px;
+        margin: 0;
+        line-height: 1.15;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      header p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        margin: 14px;
+        padding: 14px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .full {
+        grid-column: 1 / -1;
+      }
+      label {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 12px 11px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: #0c0f14;
+        color: var(--text);
+        font-size: 16px;
+      }
+      input::placeholder {
+        color: #666;
+        font-style: italic;
+      }
+      input[type="number"]::-webkit-outer-spin-button,
+      input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .result {
+        font-size: 42px;
+        font-weight: 800;
+        margin: 0;
+      }
+      .tag {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        margin-left: 8px;
+        border: 1px solid var(--border);
+        background: #0c0f14;
+        color: var(--muted);
+      }
+      .tag.lean {
+        color: #e74c3c;
+      }
+      .tag.rich {
+        color: var(--good);
+      }
+      .soft {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .btn {
+        display: inline-block;
+        padding: 12px 16px;
+        border-radius: 12px;
+        background: var(--accent);
+        color: white;
+        text-align: center;
+        text-decoration: none;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+      }
+      .btn-secondary {
+        background: #363a45;
+        border: 1px solid var(--border);
+        color: var(--muted);
+      }
+      .inline {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .footer {
+        padding: 12px 16px 24px;
+        color: var(--muted);
+        font-size: 12px;
+        text-align: center;
+      }
+      .mode {
+        font-weight: 700;
+      }
+      .plug {
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <img class="logo" src="logo.png" alt="Racing Team Cura logo" />
+      <div class="titlewrap">
+        <h1>JanFred Sproeier Calculator</h1>
+        <p id="subtitle">
+          Rotax Max Senior EVO •
+          <span class="mode">Prisma-modus</span> (baseline 133 @ 1.225 kg/m³)
+        </p>
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="grid">
+        <div class="full">
+          <label for="mode">Modus</label>
+          <select id="mode">
+            <option value="prisma" selected>
+              Prisma-modus (matcht officiële Prisma-calculator)
+            </option>
+            <option value="rule">
+              Vuistregel-modus (1 jet / 1% ρ, baseline 131)
+            </option>
+          </select>
+        </div>
+        <div>
+          <label for="temp">Temperatuur (°C)</label>
+          <input type="number" id="temp" inputmode="decimal" placeholder="°C" />
+        </div>
+        <div>
+          <label for="pressure">Luchtdruk (hPa)</label>
+          <input
+            type="number"
+            id="pressure"
+            inputmode="decimal"
+            placeholder="hPa"
+          />
+        </div>
+        <div>
+          <label for="rh">Relatieve Vochtigheid (%)</label>
+          <input type="number" id="rh" inputmode="decimal" placeholder="%" />
+        </div>
+        <div>
+          <label for="alt">Hoogte (m)</label>
+          <input
+            type="number"
+            id="alt"
+            inputmode="decimal"
+            placeholder="m"
+            value="0"
+          />
+          <div class="soft">
+            (Nog niet in de berekening verwerkt – toekomstfeature.)
+          </div>
+        </div>
+        <div class="full">
+          <label for="rho">
+            Luchtdichtheid (kg/m³)
+            <span class="soft">(optioneel – overschrijft berekening)</span>
+          </label>
+          <input
+            type="number"
+            id="rho"
+            inputmode="decimal"
+            step="0.001"
+            placeholder="kg/m³"
+          />
+        </div>
+      </div>
+      <div style="margin-top: 12px" class="inline">
+        <div class="soft">
+          Als <b>luchtdichtheid</b> is ingevuld, wordt die gebruikt. Anders
+          wordt ρ berekend uit T, P, rH.
+        </div>
+        <button id="useCalc" class="btn" style="background: #1d7cf2" type="button">
+          Gebruik berekende ρ
+        </button>
+      </div>
+      <div style="margin-top: 8px; text-align: right">
+        <button id="resetBtn" class="btn btn-secondary" type="button">
+          Reset alle velden
+        </button>
+      </div>
+    </section>
+
+    <section class="card">
+      <label for="fetchWeather">Weer via GPS (optioneel)</label>
+      <div class="inline" style="margin-top: 6px">
+        <button id="fetchWeather" class="btn" type="button">
+          🌤 Haal weer op via GPS
+        </button>
+        <span id="weatherStatus" class="soft">
+          Werkt alleen met internet + GPS-toestemming.
+        </span>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="inline">
+        <div>
+          <div class="soft">Aanbevolen sproeier</div>
+          <div class="row" style="align-items: baseline; gap: 10px">
+            <h2 id="jet" class="result">—</h2>
+            <span id="flag" class="tag">—</span>
+          </div>
+        </div>
+        <div>
+          <label for="baseline" class="soft">
+            Baseline (alleen in Vuistregel)
+          </label>
+          <input id="baseline" type="number" value="131" min="120" max="140" />
+        </div>
+      </div>
+      <div class="soft" style="margin-top: 8px" id="ruleNote">
+        Vuistregel: ~<b>1 jet per 1% ρ-verandering</b> t.o.v. 1.225 kg/m³.
+        Startpunt – verifieer met bougiekleur &amp; prestaties.
+      </div>
+      <div
+        class="soft"
+        style="margin-top: 8px; display: none"
+        id="prismaNote"
+      >
+        Prisma: <b>1.47 jet per 1% ρ-verandering</b> t.o.v. 1.225 kg/m³,
+        baseline 133. Afgerond op hele jets.
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="grid">
+        <div class="full">
+          <label>Aanbevolen bougie (automatisch)</label>
+          <div id="plugLine" class="row">
+            <div id="plugIcon" style="font-size: 20px">⚖️</div>
+            <div id="plugText" class="plug">Denso IW27 (gap 0.6 mm)</div>
+          </div>
+          <div class="soft">
+            Regels: &gt; 1.220 kg/m³ → 🔥 IW24 · 1.200–1.220 → ⚖️ IW27 · &lt;
+            1.200 → ❄️ IW29
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NIEUWE SECTIE: LUCHTSCHROEF-AFSTELLING -->
+    <section class="card">
+      <div class="grid">
+        <div class="full">
+          <label>Theoretische luchtschroef-afstelling</label>
+          <div class="soft" id="airScrewSummary">
+            Vul temperatuur, druk en vochtigheid in om een advies te zien.
+          </div>
+          <div class="soft" id="airScrewDetail" style="margin-top: 6px">
+            Referentie: 2.00 slagen open bij 1.225 kg/m³.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="footer">
+      <div>
+        Installeer via Safari: Deel ⟶ ‘Zet op beginscherm’.<br />
+        Werkt offline. GPS-weer werkt alleen met internet.
+      </div>
+    </section>
+
+    <script>
+      // --- Constants ---
+      const R_d = 287.058;
+      const R_v = 461.495;
+      const RHO_STD = 1.225;
+      const MODES = {
+        prisma: { baseline: 133, slope: 1.47 },
+        rule: { baseline: null, slope: 1.0 },
+      };
+
+      const AIR_SCREW_BASE_TURNS = 2.0; // 2.00 slagen open @ 1.225 kg/m³
+      const AIR_SCREW_SLOPE = 0.05; // 0.05 slag per 1% ρ → +3% = +0.15 slag
+      const AIR_SCREW_MIN = 1.0;
+      const AIR_SCREW_MAX = 3.0;
+
+      // Cache DOM elements
+      const els = {
+        mode: document.getElementById("mode"),
+        temp: document.getElementById("temp"),
+        pressure: document.getElementById("pressure"),
+        rh: document.getElementById("rh"),
+        rho: document.getElementById("rho"),
+        alt: document.getElementById("alt"),
+        baseline: document.getElementById("baseline"),
+        jet: document.getElementById("jet"),
+        flag: document.getElementById("flag"),
+        subtitle: document.getElementById("subtitle"),
+        ruleNote: document.getElementById("ruleNote"),
+        prismaNote: document.getElementById("prismaNote"),
+        plugIcon: document.getElementById("plugIcon"),
+        plugText: document.getElementById("plugText"),
+        weatherStatus: document.getElementById("weatherStatus"),
+        useCalc: document.getElementById("useCalc"),
+        fetchWeather: document.getElementById("fetchWeather"),
+        resetBtn: document.getElementById("resetBtn"),
+        airScrewSummary: document.getElementById("airScrewSummary"),
+        airScrewDetail: document.getElementById("airScrewDetail"),
+      };
+
+      // --- Helpers ---
+      function es_hPa(Tc) {
+        return 6.112 * Math.exp((17.62 * Tc) / (243.12 + Tc));
+      }
+
+      function computeDensity(Tc, P_hPa, RH) {
+        const T = Tc + 273.15;
+        const P = P_hPa * 100;
+        const e = es_hPa(Tc) * (RH / 100);
+        const e_Pa = e * 100;
+        const Pd = P - e_Pa;
+        return Pd / (R_d * T) + e_Pa / (R_v * T);
+      }
+
+      function densityPercentDelta(rho) {
+        return ((rho - RHO_STD) / RHO_STD) * 100.0;
+      }
+
+      function clamp(v, lo, hi) {
+        return Math.max(lo, Math.min(hi, v));
+      }
+
+      function recommendJet(rho, mode, baselineInput) {
+        const dPct = densityPercentDelta(rho);
+        let baseline = baselineInput;
+        if (mode === "prisma") {
+          baseline = MODES.prisma.baseline;
+        }
+        const slope =
+          mode === "prisma" ? MODES.prisma.slope : MODES.rule.slope;
+        let jet = baseline + dPct * slope;
+        jet = Math.round(jet);
+        return clamp(jet, 115, 155);
+      }
+
+      function recommendPlug(rho) {
+        if (rho > 1.22) {
+          return { icon: "🔥", text: "Denso IW24 (gap 0.6 mm)" };
+        }
+        if (rho < 1.2) {
+          return { icon: "❄️", text: "Denso IW29 (gap 0.6 mm)" };
+        }
+        return { icon: "⚖️", text: "Denso IW27 (gap 0.6 mm)" };
+      }
+
+      function parseNumber(value) {
+        if (typeof value !== "string") return NaN;
+        const cleaned = value.replace(",", ".");
+        const num = parseFloat(cleaned);
+        return isNaN(num) ? NaN : num;
+      }
+
+      // --- LUCHTSCHROEF-BEREKENING ---
+      function recommendAirScrew(rho) {
+        if (!isFinite(rho) || rho <= 0) {
+          return null;
+        }
+        const dPct = densityPercentDelta(rho);
+        let turns =
+          AIR_SCREW_BASE_TURNS + (dPct * AIR_SCREW_SLOPE) / 1.0; // 0.05 slag per 1% ρ
+        turns = clamp(turns, AIR_SCREW_MIN, AIR_SCREW_MAX);
+        return { turns, dPct, rho };
+      }
+
+      function formatTurns(turns) {
+        return turns.toFixed(2);
+      }
+
+      // --- UI update ---
+      function update() {
+        const Tc = parseNumber(els.temp.value);
+        const P = parseNumber(els.pressure.value);
+        const RH = parseNumber(els.rh.value);
+        const mode = els.mode.value;
+        const baselineInput =
+          parseNumber(els.baseline.value) || parseFloat("131");
+
+        if (isNaN(Tc) || isNaN(P) || isNaN(RH)) {
+          els.jet.textContent = "—";
+          els.flag.textContent = "—";
+          els.flag.className = "tag";
+          els.plugIcon.textContent = "⚖️";
+          els.plugText.textContent = "Denso IW27 (gap 0.6 mm)";
+          els.airScrewSummary.textContent =
+            "Vul temperatuur, druk en vochtigheid in om een advies te zien.";
+          els.airScrewDetail.textContent =
+            "Referentie: 2.00 slagen open bij 1.225 kg/m³.";
+          return;
+        }
+
+        // notes per modus
+        els.ruleNote.style.display = mode === "rule" ? "block" : "none";
+        els.prismaNote.style.display = mode === "prisma" ? "block" : "none";
+        els.subtitle.innerHTML =
+          mode === "prisma"
+            ? "Rotax Max Senior EVO • <span class='mode'>Prisma-modus</span> (baseline 133 @ 1.225 kg/m³)"
+            : "Rotax Max Senior EVO • <span class='mode'>Vuistregel-modus</span> (baseline aanpasbaar)";
+
+        const rhoInput = els.rho.value;
+        const rho =
+          rhoInput !== "" ? parseNumber(rhoInput) : computeDensity(Tc, P, RH);
+        const jet = recommendJet(rho, mode, baselineInput);
+        const dPct = densityPercentDelta(rho);
+
+        if (isFinite(jet)) {
+          els.jet.textContent = jet;
+          els.flag.textContent =
+            (dPct > 0 ? "+" : "") + dPct.toFixed(1) + "% ρ";
+          els.flag.className = "tag " + (dPct > 0 ? "rich" : "lean");
+        } else {
+          els.jet.textContent = "—";
+          els.flag.textContent = "—";
+          els.flag.className = "tag";
+        }
+
+        const plug = recommendPlug(rho);
+        els.plugIcon.textContent = plug.icon;
+        els.plugText.textContent = plug.text;
+
+        // Luchtschroef-sectie bijwerken
+        const air = recommendAirScrew(rho);
+        if (air) {
+          const dirText =
+            air.dPct > 0
+              ? "De lucht is duidelijk dichter dan standaard, daarom een iets rijkere basisafstelling (meer slagen open t.o.v. 2.00)."
+              : air.dPct < 0
+              ? "De lucht is dunner dan standaard, daarom een iets armere basisafstelling (minder slagen open t.o.v. 2.00)."
+              : "Luchtdichtheid is praktisch gelijk aan standaard, 2.00 slagen open is een goed uitgangspunt.";
+
+          els.airScrewSummary.textContent =
+            "Theoretische luchtschroef: " +
+            formatTurns(air.turns) +
+            " slagen open";
+          els.airScrewDetail.textContent =
+            "Referentie: 2.00 slagen open bij 1.225 kg/m³. " +
+            "Huidige luchtdichtheid: " +
+            air.rho.toFixed(3) +
+            " kg/m³ (" +
+            (air.dPct > 0 ? "+" : "") +
+            air.dPct.toFixed(1) +
+            "% t.o.v. 1.225). " +
+            dirText;
+        } else {
+          els.airScrewSummary.textContent =
+            "Vul geldige waarden in om een luchtschroef-advies te zien.";
+          els.airScrewDetail.textContent =
+            "Referentie: 2.00 slagen open bij 1.225 kg/m³.";
+        }
+
+        // eenvoudige state in localStorage bewaren
+        const state = {
+          mode,
+          temp: Tc,
+          pressure: P,
+          rh: RH,
+          rho: rhoInput !== "" ? rho : null,
+          baseline: baselineInput,
+        };
+        try {
+          localStorage.setItem("lastState", JSON.stringify(state));
+        } catch (e) {
+          // ignore
+        }
+      }
+
+      // --- Weather via GPS ---
+      async function fetchWeatherFromGPS() {
+        els.weatherStatus.textContent = "GPS zoeken…";
+        if (!navigator.geolocation) {
+          els.weatherStatus.textContent = "GPS niet beschikbaar op dit apparaat.";
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(
+          async (pos) => {
+            const { latitude, longitude } = pos.coords;
+            els.weatherStatus.textContent = "Weer ophalen…";
+            try {
+              const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,pressure_msl`;
+              const res = await fetch(url);
+              const data = await res.json();
+              const cur = data.current;
+              const temp = cur.temperature_2m;
+              const pressure = cur.pressure_msl;
+              const rh = cur.relative_humidity_2m;
+              els.temp.value = temp.toFixed(1);
+              els.pressure.value = pressure.toFixed(1);
+              els.rh.value = rh.toFixed(0);
+              els.alt.value = "0";
+              localStorage.setItem(
+                "lastWeather",
+                JSON.stringify({
+                  temp,
+                  pressure,
+                  rh,
+                  time: new Date().toISOString(),
+                })
+              );
+              els.weatherStatus.textContent =
+                "Weer geladen. Waarden ingevuld, kun je aanpassen.";
+              update();
+            } catch (e) {
+              els.weatherStatus.textContent =
+                "Kon weer niet ophalen (geen internet of API-fout).";
+            }
+          },
+          () => {
+            els.weatherStatus.textContent = "GPS afgewezen of mislukt.";
+          }
+        );
+      }
+
+      // --- Reset ---
+      function resetAll() {
+        els.mode.value = "prisma";
+        els.subtitle.innerHTML =
+          "Rotax Max Senior EVO • <span class='mode'>Prisma-modus</span> (baseline 133 @ 1.225 kg/m³)";
+        els.ruleNote.style.display = "none";
+        els.prismaNote.style.display = "block";
+        els.temp.value = "";
+        els.pressure.value = "";
+        els.rh.value = "";
+        els.rho.value = "";
+        els.alt.value = "0";
+        els.baseline.value = "131";
+        els.jet.textContent = "—";
+        els.flag.textContent = "—";
+        els.flag.className = "tag";
+        els.plugIcon.textContent = "⚖️";
+        els.plugText.textContent = "Denso IW27 (gap 0.6 mm)";
+        els.weatherStatus.textContent =
+          "Werkt alleen met internet + GPS-toestemming.";
+        els.airScrewSummary.textContent =
+          "Vul temperatuur, druk en vochtigheid in om een advies te zien.";
+        els.airScrewDetail.textContent =
+          "Referentie: 2.00 slagen open bij 1.225 kg/m³.";
+        localStorage.removeItem("lastWeather");
+        localStorage.removeItem("lastState");
+      }
+
+      // --- Init ---
+      document.addEventListener("DOMContentLoaded", () => {
+        document
+          .querySelectorAll("input,select")
+          .forEach((el) => el.addEventListener("input", update));
+        els.useCalc.addEventListener("click", () => {
+          const Tc = parseNumber(els.temp.value) || 20;
+          const P = parseNumber(els.pressure.value) || 1013.25;
+          const RH = parseNumber(els.rh.value) || 50;
+          const rho = computeDensity(Tc, P, RH);
+          els.rho.value = rho.toFixed(3);
+          update();
+        });
+        els.fetchWeather.addEventListener("click", fetchWeatherFromGPS);
+        els.resetBtn.addEventListener("click", resetAll);
+
+        const savedWeather = localStorage.getItem("lastWeather");
+        if (savedWeather) {
+          try {
+            const w = JSON.parse(savedWeather);
+            if (w.temp !== undefined) els.temp.value = w.temp;
+            if (w.pressure !== undefined) els.pressure.value = w.pressure;
+            if (w.rh !== undefined) els.rh.value = w.rh;
+            els.weatherStatus.textContent =
+              "Laatst gebruikte weerdata uit opslag.";
+          } catch (e) {
+            // ignore
+          }
+        }
+
+        const savedState = localStorage.getItem("lastState");
+        if (savedState) {
+          try {
+            const s = JSON.parse(savedState);
+            if (s.mode) els.mode.value = s.mode;
+            if (!isNaN(s.baseline)) els.baseline.value = s.baseline;
+            if (s.rho !== null && !isNaN(s.rho)) {
+              els.rho.value = s.rho.toFixed
+                ? s.rho.toFixed(3)
+                : String(s.rho);
+            }
+          } catch (e) {
+            // ignore
+          }
+        }
+
+        update();
+      });
+    </script>
+  </body>
+</html>
