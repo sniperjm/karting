@@ -2,151 +2,305 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#ff2d55" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icon-512.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Sproeier Calculator</title>
   <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #161a22;
+      --panel-2: #1b2028;
+      --text: #e8ecf1;
+      --muted: #9aa4b2;
+      --border: #252b36;
+      --accent: #ff2d55;
+      --good: #2ecc71;
+      --bad: #ff6b6b;
+      --cold: #4ea1ff;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
     body {
-      font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: 20px auto;
-      padding: 80px 20px 20px;
-      border: 1px solid #b8dfc8;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #f7fbf8 0%, #e4f5ea 100%);
-      color: #123524;
-      position: relative;
+      max-width: 640px;
+      margin: 0 auto;
+      padding-bottom: 40px;
     }
-    .logo-wrapper {
-      position: absolute;
-      top: 20px;
-      right: 20px;
+    header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 16px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(135deg, #1a0d12 0%, var(--bg) 60%);
     }
-    .logo-wrapper img {
-      width: 96px;
-      height: auto;
-      display: block;
+    header img {
+      height: 56px;
+      width: auto;
+      flex: 0 0 auto;
+      border-radius: 10px;
     }
-    h1 {
-      font-size: 22px;
-      margin-bottom: 10px;
-      color: #1f7a3d;
+    header .titlewrap { min-width: 0; }
+    header h1 {
+      margin: 0;
+      font-size: 21px;
+      letter-spacing: 0.2px;
     }
+    header p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.4;
+    }
+    header p a { color: var(--accent); text-decoration: none; }
+    header p a:hover { text-decoration: underline; }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin: 14px;
+      padding: 16px;
+    }
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .full { grid-column: 1 / -1; }
     label {
       display: block;
-      margin-top: 10px;
-      font-weight: bold;
-      color: #1e5c36;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+      font-weight: 600;
     }
-    input {
+    input, select {
       width: 100%;
-      padding: 6px;
-      margin-top: 4px;
-      box-sizing: border-box;
-      border: 1px solid #8ec9a5;
-      border-radius: 6px;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      color: var(--text);
+      font-size: 16px;
     }
-    button {
-      margin-top: 15px;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 20px;
-      cursor: pointer;
-      background: #2ecc71;
-      color: #fff;
-      font-weight: bold;
-      transition: background 0.2s ease;
-    }
-    button:hover { background: #28b862; }
-    .btn-secondary {
-      background: #95a5a6;
-      color: #fff;
-    }
-    .btn-secondary:hover { background: #7f8c8d; }
-    #resultaat {
-      margin-top: 20px;
-      font-size: 18px;
-      font-weight: bold;
-      color: #155f33;
-    }
-    .extra-info {
-      margin-top: 5px;
-      font-size: 13px;
-      color: #2d7043;
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
     }
     .knoppen {
       display: flex;
       flex-direction: column;
       gap: 10px;
-      margin-top: 20px;
+      margin-top: 16px;
     }
-    #bougie {
-      margin-top: 25px;
-      padding: 12px;
-      border-top: 1px solid #b8dfc8;
+    button {
+      padding: 13px 16px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 700;
       font-size: 15px;
-      background: #ecf8f0;
-      border-radius: 8px;
+      transition: filter 0.15s ease, transform 0.05s ease;
+    }
+    button:active { transform: scale(0.99); }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover { filter: brightness(1.08); }
+    .btn-secondary {
+      background: var(--panel-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { filter: brightness(1.15); }
+    .btn-gps {
+      background: var(--cold);
+      color: #06131f;
+    }
+    .btn-gps:hover { filter: brightness(1.08); }
+
+    .result-row {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    #resultaat {
+      font-size: 42px;
+      font-weight: 800;
+      margin: 0;
+      line-height: 1;
+    }
+    .tag {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      color: var(--muted);
+    }
+    .tag.rich { color: var(--good); border-color: var(--good); }
+    .tag.lean { color: var(--bad); border-color: var(--bad); }
+    .extra-info {
+      margin-top: 6px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .status {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--muted);
+      min-height: 18px;
+    }
+
+    #bougie {
+      margin-top: 4px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 14.5px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
       display: flex;
       align-items: center;
-      gap: 8px;
-      transition: background 0.3s ease, color 0.3s ease;
+      gap: 10px;
+      transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
     }
-    .bougie-warm {
-      background: #fde8e8;
-      color: #b00000;
+    .bougie-warm { color: var(--bad); border-color: var(--bad); }
+    .bougie-normaal { color: var(--good); border-color: var(--good); }
+    .bougie-koud { color: var(--cold); border-color: var(--cold); }
+    .bougie-icoon { font-size: 20px; flex: 0 0 auto; }
+    .disclaimer {
+      font-size: 11.5px;
+      color: var(--muted);
+      margin-top: 8px;
+      line-height: 1.4;
     }
-    .bougie-normaal {
-      background: #e8f9ec;
-      color: #137c32;
+    footer {
+      margin: 14px;
+      padding: 14px 16px;
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.5;
+      border-top: 1px solid var(--border);
     }
-    .bougie-koud {
-      background: #e7f2fc;
-      color: #004f9f;
-    }
-    .bougie-icoon {
-      font-size: 20px;
-    }
+    footer a { color: var(--accent); }
   </style>
 </head>
 <body>
-  <div class="logo-wrapper">
+  <header>
     <img src="logo.png" alt="Racing Team Cura logo" />
-  </div>
+    <div class="titlewrap">
+      <h1>Sproeier Calculator</h1>
+      <p>
+        Luchtdichtheid-model gebaseerd op de
+        <a href="https://prismaelectronics.com/blogs/hpm5-technical-support/how-to-optimize-2-stroke-jetting-air-density" target="_blank" rel="noopener">Prisma Electronics AirPro-methode</a>.
+      </p>
+    </div>
+  </header>
 
-  <h1>Sproeier Calculator</h1>
-  <p>
-    Vul de weergegevens in of gebruik de GPS-knop om ze automatisch op te halen.
-    De berekening gebruikt het Prisma-model (baseline 133, 1.47 jet per 1% ρ-verschil).
-  </p>
+  <section class="card">
+    <h2>Instellingen</h2>
+    <div class="grid">
+      <div class="full">
+        <label for="engine">Rotax motor</label>
+        <select id="engine">
+          <option value="dd2">Rotax DD2</option>
+          <option value="junior">Rotax Junior</option>
+          <option value="senior" selected>Rotax Senior</option>
+          <option value="mini">Rotax Mini</option>
+          <option value="micro">Rotax Micro</option>
+        </select>
+      </div>
 
-  <label for="temp">Temperatuur (°C)</label>
-  <input id="temp" type="number" placeholder="°C" />
+      <div>
+        <label for="temp">Temperatuur (°C)</label>
+        <input id="temp" type="number" inputmode="decimal" placeholder="°C" />
+      </div>
 
-  <label for="druk">Luchtdruk (hPa)</label>
-  <input id="druk" type="number" placeholder="hPa" />
+      <div>
+        <label for="druk">Luchtdruk (hPa)</label>
+        <input id="druk" type="number" inputmode="decimal" placeholder="hPa" />
+      </div>
 
-  <label for="vocht">Vochtigheid (%)</label>
-  <input id="vocht" type="number" placeholder="%" />
+      <div>
+        <label for="vocht">Vochtigheid (%)</label>
+        <input id="vocht" type="number" inputmode="decimal" placeholder="%" />
+      </div>
 
-  <label for="hoogte">Hoogte (m boven zeeniveau)</label>
-  <input id="hoogte" type="number" placeholder="m" value="0" />
+      <div>
+        <label for="hoogte">Hoogte (m boven zeeniveau)</label>
+        <input id="hoogte" type="number" inputmode="decimal" placeholder="m" value="0" />
+      </div>
+    </div>
 
-  <div class="knoppen">
-    <button id="bereken" type="button">Bereken sproeier</button>
-    <button id="gps" type="button">🌤 Haal weer op via GPS</button>
-    <button id="reset" type="button" class="btn-secondary">Reset alle velden</button>
-  </div>
+    <div class="knoppen">
+      <button id="bereken" type="button" class="btn-primary">Bereken sproeier</button>
+      <button id="gps" type="button" class="btn-gps">🌤 Haal weer op via GPS</button>
+      <button id="reset" type="button" class="btn-secondary">Reset alle velden</button>
+    </div>
+    <div id="status" class="status"></div>
+  </section>
 
-  <div id="resultaat"></div>
-  <div id="density" class="extra-info"></div>
-  <div id="extra" class="extra-info"></div>
+  <section class="card">
+    <h2>Resultaat</h2>
+    <div class="result-row">
+      <p id="resultaat">—</p>
+      <span id="pctTag" class="tag">—</span>
+    </div>
+    <div id="density" class="extra-info"></div>
+    <div class="extra-info">Controleer altijd bougiekleur en prestaties op de baan.</div>
+  </section>
 
-  <div id="bougie" class="bougie-normaal">
-    <span class="bougie-icoon">⚖️</span>
-    <span id="bougie-text"><strong>Advies bougie:</strong> nog geen berekening uitgevoerd.</span>
-  </div>
+  <section class="card">
+    <h2>Bougie-indicatie</h2>
+    <div id="bougie" class="bougie-normaal">
+      <span class="bougie-icoon">⚖️</span>
+      <span id="bougie-text"><strong>Advies bougie:</strong> nog geen berekening uitgevoerd.</span>
+    </div>
+    <div class="disclaimer">
+      Let op: dit is een eigen vuistregel op basis van luchtdichtheid, geen officieel Prisma-advies.
+      Gebruik dit als startpunt en controleer altijd het bougiebeeld na een run.
+    </div>
+  </section>
+
+  <footer>
+    Werkt offline (op te slaan op je beginscherm). GPS-weer haalt actuele temperatuur, luchtdruk,
+    vochtigheid en hoogte op via <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>.
+    De sproeieraanbeveling is een schatting op basis van luchtdichtheid t.o.v. 1.225 kg/m³ — geen vervanging
+    voor het echte Prisma-instrument of testwerk op de baan.
+  </footer>
 
   <script>
     const R_DROOG = 287.058, R_WATER = 461.495, RHO_REF = 1.225;
+    const SLOPE = 1.47;
+    const ENGINE_BASELINE = {
+      dd2: 137,
+      junior: 135,
+      senior: 133,
+      mini: 120,
+      micro: 114
+    };
 
     function verzadigingsdruk_hPa(tC) {
       return 6.112 * Math.exp((17.62 * tC) / (243.12 + tC));
@@ -172,10 +326,11 @@
       return ((rho - RHO_REF) / RHO_REF) * 100;
     }
 
-    function prismaJet(rho) {
+    function prismaJet(rho, engine) {
       const delta = deltaRhoPercent(rho);
-      const jet = 133 + delta * 1.47;
-      return Math.round(Math.max(115, Math.min(155, jet)));
+      const baseline = ENGINE_BASELINE[engine] ?? ENGINE_BASELINE.senior;
+      const jet = baseline + delta * SLOPE;
+      return Math.round(Math.max(80, Math.min(200, jet)));
     }
 
     function updateBougie(rho) {
@@ -206,30 +361,37 @@
       const druk = parseFloat(document.getElementById('druk').value);
       const vocht = parseFloat(document.getElementById('vocht').value);
       const hoogte = parseFloat(document.getElementById('hoogte').value);
+      const engine = document.getElementById('engine').value;
+
+      const pctTag = document.getElementById('pctTag');
 
       if (isNaN(temp) || isNaN(druk) || isNaN(vocht) || isNaN(hoogte)) {
-        document.getElementById('resultaat').textContent = 'Vul alle velden goed in a.u.b.';
+        document.getElementById('resultaat').textContent = '—';
+        pctTag.textContent = '—';
+        pctTag.className = 'tag';
+        document.getElementById('status').textContent = 'Vul alle velden goed in a.u.b.';
         document.getElementById('density').textContent = '';
-        document.getElementById('extra').textContent = '';
         updateBougie(1.215);
         return;
       }
 
+      document.getElementById('status').textContent = '';
+
       const rho = berekenDichtheid(temp, druk, vocht, hoogte);
-      const jet = prismaJet(rho);
+      const jet = prismaJet(rho, engine);
       const delta = deltaRhoPercent(rho);
 
-      document.getElementById('resultaat').textContent = 'Aanbevolen sproeier: ' + jet;
+      document.getElementById('resultaat').textContent = jet;
+      pctTag.textContent = (delta >= 0 ? '+' : '') + delta.toFixed(1) + '% ρ';
+      pctTag.className = 'tag ' + (delta >= 0 ? 'rich' : 'lean');
       document.getElementById('density').textContent =
-        'Luchtdichtheid: ' + rho.toFixed(3) +
-        ' kg/m³ (' + (delta >= 0 ? '+' : '') + delta.toFixed(1) + '% t.o.v. 1.225)';
-      document.getElementById('extra').textContent = 'Controleer altijd bougiekleur en prestaties.';
+        'Luchtdichtheid: ' + rho.toFixed(3) + ' kg/m³ (t.o.v. 1.225 referentie)';
 
       updateBougie(rho);
     }
 
     async function haalWeerViaGPS() {
-      const status = document.getElementById('resultaat');
+      const status = document.getElementById('status');
       status.textContent = 'GPS zoeken...';
 
       if (!navigator.geolocation) {
@@ -250,9 +412,12 @@
           document.getElementById('temp').value = cur.temperature_2m.toFixed(1);
           document.getElementById('druk').value = cur.pressure_msl.toFixed(1);
           document.getElementById('vocht').value = cur.relative_humidity_2m.toFixed(0);
-          document.getElementById('hoogte').value = 0;
+          // Echte hoogte van de locatie gebruiken i.p.v. hem op 0 te zetten,
+          // anders klopt de hoogtecorrectie niet als je niet op zeeniveau staat.
+          const hoogte = (typeof data.elevation === 'number') ? data.elevation : 0;
+          document.getElementById('hoogte').value = hoogte.toFixed(0);
 
-          status.textContent = 'Weerdata geladen. Velden ingevuld.';
+          status.textContent = 'Weerdata geladen (incl. hoogte ' + hoogte.toFixed(0) + ' m). Velden ingevuld.';
           berekenSproeier();
         } catch {
           status.textContent = 'Kon weer niet ophalen (geen internet of API-fout).';
@@ -266,9 +431,12 @@
       ['temp', 'druk', 'vocht', 'hoogte'].forEach(id => {
         document.getElementById(id).value = id === 'hoogte' ? '0' : '';
       });
-      document.getElementById('resultaat').textContent = '';
+      document.getElementById('engine').value = 'senior';
+      document.getElementById('resultaat').textContent = '—';
+      document.getElementById('pctTag').textContent = '—';
+      document.getElementById('pctTag').className = 'tag';
       document.getElementById('density').textContent = '';
-      document.getElementById('extra').textContent = '';
+      document.getElementById('status').textContent = '';
       updateBougie(1.215);
     }
 
